@@ -1,0 +1,47 @@
+
+{% extends 'app1/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .Container {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    place-items: center;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+    width: 100%;
+    
+  }
+  .box {
+    width: 100%;
+    height: 260px;
+    border-radius: 20px;
+    background-color: #109dbd;
+    overflow: hidden;
+  }
+  .box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+<section>
+
+    <div class="Container">
+        {% for image in images %}
+            <div class="box" style="margin-top: 2%;">
+                <img src="{{ image.image.url }}" alt="Featured Image">
+            </div>
+        {% empty %}
+            <div class="box" style="height: 100%; width: 100%; object-fit: cover;"></div>
+            <div class="box"></div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

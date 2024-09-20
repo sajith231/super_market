@@ -1,0 +1,156 @@
+{% extends 'app1/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f0f4f8;
+        color: #333;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .welcome-section {
+        text-align: center;
+        padding: 50px 0;
+        background: linear-gradient(135deg, #6dd5ed, #2193b0);
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .welcome-section h2 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+    .welcome-message {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+    .sections-container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .section {
+        flex-basis: calc(50% - 15px);
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    h4 {
+        color: #34495e;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+    .btn-success {
+        background-color: #27ae60;
+        border-color: #27ae60;
+    }
+    .btn-success:hover {
+        background-color: #2ecc71;
+        border-color: #2ecc71;
+    }
+    .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+    .btn-primary:hover {
+        background-color: #2980b9;
+        border-color: #2980b9;
+    }
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #bdc3c7;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    .image-item {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .image-item img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container">
+    <div class="welcome-section">
+        <h2>Welcome, {{ shop_admin.user.username }}!</h2>
+        <p class="welcome-message">Manage your shop with ease.</p>
+    </div>
+    
+    <div class="sections-container">
+        <div class="section qr-section">
+            <h4>QR Code Generator</h4>
+            <button class="btn btn-success">Generate QR Code</button>
+        </div>
+
+        <div class="section upload-section">
+            <h4>Upload Image</h4>
+            <form method="post" enctype="multipart/form-data" >
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+
+        <div class="section image-gallery-section">
+            <h4>Uploaded Images</h4>
+            <p>Images displayed on the home page:</p>
+            
+            <div class="image-gallery">
+                {% for image in images %}
+                    <div class="image-item">
+                        <img src="{{ image.image.url }}" alt="{{ image.description }}" class="img-thumbnail" style="height: 50%; width: 50%;" >
+                        <p>{{ image.description }}</p>
+                        <form method="POST" action="{% url 'delete_image' image.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                {% empty %}
+                    <p>No images uploaded yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
