@@ -1,42 +1,73 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import ShopAdminLoginForm, ImageUploadForm
-from .models import ShopAdminProfile, UploadedImage
-from django.contrib.auth import logout
+from django.http import HttpResponseForbidden
 from django.utils import timezone
+from .forms import ShopAdminLoginForm, ImageUploadForm, ShopAdminProfileForm,ShopAdminCreationForm
+from .models import ShopAdminProfile, UploadedImage,UploadedImage
 from threading import Timer
-from datetime import timedelta
+from .models import UploadedImage, ShopAdminProfile
+import threading
 
-def index(request):
-    if not request.user.is_authenticated:
-        return redirect('shop_admin_login')
 
-    shop_admin = request.user.shopadminprofile
-    images = UploadedImage.objects.filter(shop_admin_profile=shop_admin)
-    return render(request, 'app1/index.html', {'images': images})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = ShopAdminLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                if user.is_superuser:
+                    return redirect('superuser_dashboard')
+                else:
+                    try:
+                        shop_admin_profile = ShopAdminProfile.objects.get(user=user)
+                        if shop_admin_profile.status:
+                            return redirect('shop_admin_dashboard')
+                        else:
+                            messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
+                    except ShopAdminProfile.DoesNotExist:
+                        messages.error(request, 'User does not have a shop admin profile.')
+            else:
+                messages.error(request, 'Invalid username or password.')
+    else:
+        form = ShopAdminLoginForm()
+
+    return render(request, 'app1/shop_admin_login.html', {'form': form})
+
+
+
+
+
+
+
 
 @login_required
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
-    
+
     if not shop_admin.status:
         logout(request)
         messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
         return redirect('shop_admin_login')
-    
+
     if shop_admin.validity != 'running':
         messages.warning(request, 'Your payment is pending. Some features may be limited.')
-    
-    images = UploadedImage.objects.filter(shop_admin_profile=shop_admin)
+
+    # Using the related name to get uploaded images
+    images = shop_admin.uploaded_images.all()  # This is equivalent to UploadedImage.objects.filter(shop_admin_profile=shop_admin)
 
     if request.method == 'POST':
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
             new_image = form.save(commit=False)
             new_image.shop_admin_profile = shop_admin
-            new_image.display_order = UploadedImage.objects.filter(shop_admin_profile=shop_admin).count() + 1
+            new_image.display_order = images.count() + 1  # Using the count of the retrieved images
             new_image.save()
             messages.success(request, 'Image uploaded successfully!')
             return redirect('shop_admin_dashboard')
@@ -49,30 +80,111 @@ def shop_admin_dashboard(request):
         'shop_admin': shop_admin
     })
 
-def shop_admin_login(request):
+
+
+
+
+
+
+
+
+@login_required
+def superuser_dashboard(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    shop_admin_profiles = ShopAdminProfile.objects.all()
+    return render(request, 'app1/superuser_dashboard.html', {'shop_admin_profiles': shop_admin_profiles})
+
+def change_validity_after_one_minute(profile):
+     import time
+     time.sleep(60)  # Wait for 1 minute
+     profile.validity = 'pending payment'
+     profile.save()
+
+
+
+
+
+
+
+
+
+
+@login_required
+def create_shop_admin(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+
     if request.method == 'POST':
-        form = ShopAdminLoginForm(request.POST)
+        form = ShopAdminCreationForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
+            shop_admin_profile = form.save()  # Save the User and ShopAdminProfile
+            messages.success(request, 'New Shop Admin created successfully!')
 
-            if user is not None:
-                try:
-                    shop_admin_profile = ShopAdminProfile.objects.get(user=user)
-                    if shop_admin_profile.status:  # Check if the account is enabled
-                        login(request, user)
-                        return redirect('shop_admin_dashboard')
-                    else:
-                        messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
-                except ShopAdminProfile.DoesNotExist:
-                    messages.error(request, 'User does not have a shop admin profile.')
-            else:
-                messages.error(request, 'Invalid credentials. Please try again.')
+            # Start a thread to change the validity status after one minute
+            threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile,)).start()
+
+            return redirect('superuser_dashboard')  # Redirect to the superuser dashboard
+        
     else:
-        form = ShopAdminLoginForm()
+        form = ShopAdminCreationForm()
 
-    return render(request, 'app1/shop_admin_login.html', {'form': form})
+    return render(request, 'app1/create_shop_admin.html', {'form': form})
+
+
+
+
+
+
+
+
+
+@login_required
+def edit_shop_admin(request, profile_id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    profile = get_object_or_404(ShopAdminProfile, id=profile_id)
+    
+    if request.method == 'POST':
+        form = ShopAdminProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Shop admin profile updated successfully!')
+            return redirect('superuser_dashboard')
+    else:
+        form = ShopAdminProfileForm(instance=profile)
+
+    return render(request, 'app1/edit_shop_admin.html', {'form': form, 'profile': profile})
+
+
+
+
+
+
+
+
+
+
+@login_required
+def toggle_status(request, profile_id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    profile = get_object_or_404(ShopAdminProfile, id=profile_id)
+    profile.status = not profile.status
+    profile.save()
+    status_text = "enabled" if profile.status else "disabled"
+    messages.success(request, f'Shop admin account has been {status_text}.')
+    return redirect('superuser_dashboard')
+
+
+
+
+
+
+
+
 
 @login_required
 def delete_image(request, image_id):
@@ -83,6 +195,12 @@ def delete_image(request, image_id):
         return redirect('shop_admin_dashboard')
     return render(request, 'app1/confirm_delete.html', {'image': image})
 
+
+
+
+
+
+
 @login_required
 def toggle_featured(request, image_id):
     image = get_object_or_404(UploadedImage, id=image_id)
@@ -91,49 +209,88 @@ def toggle_featured(request, image_id):
     messages.success(request, 'Image featured status updated.')
     return redirect('shop_admin_dashboard')
 
-@login_required
+
+
+
+
+
+
 def shop_admin_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('shop_admin_login')
 
-@login_required
-def upload_image(request):
-    shop_admin_profile = get_object_or_404(ShopAdminProfile, user=request.user)
 
+
+
+
+def superuser_logout(request):
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('shop_admin_login')
+
+
+
+
+
+
+
+
+
+
+@login_required
+def upload_image_view(request):  # Changed the name from `UploadedImage` to `upload_image_view`
     if request.method == 'POST':
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
             new_image = form.save(commit=False)
-            new_image.shop_admin_profile = shop_admin_profile  # Assign the shop admin profile here
+            shop_admin_profile = ShopAdminProfile.objects.get(user=request.user)
+            new_image.shop_admin_profile = shop_admin_profile
+            new_image.display_order = UploadedImage.objects.filter(shop_admin_profile=shop_admin_profile).count() + 1
             new_image.save()
+            messages.success(request, 'Image uploaded successfully!')
             return redirect('shop_admin_dashboard')
     else:
         form = ImageUploadForm()
-
+    
     return render(request, 'app1/upload_image.html', {'form': form})
 
-def create_shop_admin(request):
-    if request.method == 'POST':
-        form = ShopAdminLoginForm(request.POST)
-        if form.is_valid():
-            shop_admin_profile = form.save(commit=False)
-            shop_admin_profile.status = False  # Initially disabled
-            shop_admin_profile.validity = 'payment pending'
-            shop_admin_profile.created_at = timezone.now()
-            shop_admin_profile.save()
 
-            # Set a timer to update the status after 1 minute
-            Timer(60, enable_status, [shop_admin_profile]).start()
 
-            messages.success(request, 'Shop admin created successfully!')
-            return redirect('shop_admin_dashboard')
-    else:
-        form = ShopAdminLoginForm()
 
-    return render(request, 'app1/create_shop_admin.html', {'form': form})
 
-def enable_status(shop_admin_profile):
-    shop_admin_profile.status = True
-    shop_admin_profile.validity = 'running'  # Update validity
-    shop_admin_profile.save()
+
+
+@login_required
+def index(request):
+    try:
+        # Get the logged-in user's shop admin profile
+        shop_admin_profile = ShopAdminProfile.objects.get(user=request.user)
+
+        # Retrieve only the images uploaded by this shop admin
+        images = UploadedImage.objects.filter(shop_admin_profile=shop_admin_profile)
+
+        return render(request, 'app1/index.html', {'images': images, 'shop_admin': shop_admin_profile})
+    
+    except ShopAdminProfile.DoesNotExist:
+        # If the user doesn't have a shop admin profile, redirect them or show an error
+        return redirect('shop_admin_login')
+    
+
+
+
+
+@login_required
+def delete_shop_admin(request, profile_id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    profile = get_object_or_404(ShopAdminProfile, id=profile_id)
+    
+    # Optionally, you could also delete the associated user
+    user = profile.user
+    profile.delete()
+    user.delete()  # Delete the associated User object, if desired
+
+    messages.success(request, 'Shop admin deleted successfully!')
+    return redirect('superuser_dashboard')

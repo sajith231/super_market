@@ -1,0 +1,103 @@
+{% extends 'app1/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="text-center mb-0">Create New Shop Admin</h2>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="id_username" name="username" required maxlength="150">
+                            <div class="invalid-feedback">Please provide a username.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="id_password" name="password" required>
+                            <div class="invalid-feedback">Please provide a password.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_shop_name" class="form-label">Shop Name</label>
+                            <input type="text" class="form-control" id="id_shop_name" name="shop_name" required maxlength="100">
+                            <div class="invalid-feedback">Please provide a shop name.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_address" class="form-label">Address</label>
+                            <textarea class="form-control" id="id_address" name="address" required maxlength="255" rows="3"></textarea>
+                            <div class="invalid-feedback">Please provide an address.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_phone_number" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="id_phone_number" name="phone_number" required maxlength="15">
+                            <div class="invalid-feedback">Please provide a valid phone number.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="id_location" name="location" required maxlength="100">
+                            <div class="invalid-feedback">Please provide a location.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="id_amount" name="amount" required step="0.01">
+                            <div class="invalid-feedback">Please provide an amount.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Shop Admin</button>
+                            <a href="{% url 'superuser_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}
+
+{% endblock %}
+

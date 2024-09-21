@@ -1,0 +1,58 @@
+{% extends 'app1/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Superuser Dashboard</h2>
+        <a href="{% url 'superuser_logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+    <a href="{% url 'create_shop_admin' %}" class="btn btn-primary mb-3">Create New Shop Admin</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Shop Name</th>
+                <th>Username</th>
+                <th>Address</th>
+                <th>Location</th>
+                <th>Phone Number</th>
+                <th>Amount</th>
+                <th>Validity</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in shop_admin_profiles %}
+            <tr>
+                <td>{{ profile.shop_name }}</td>
+                <td>{{ profile.user.username }}</td>
+                <td>{{ profile.address }}</td>
+                <td>{{ profile.location }}</td>
+                <td>{{ profile.phone_number }}</td>
+                <td>{{ profile.amount }}</td>
+                <td class="{% if profile.validity == 'running' %}text-success{% else %}text-warning{% endif %}">
+                    {{ profile.validity }}
+                </td>
+                <td>
+                    <form action="{% url 'toggle_status' profile.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if profile.status %}btn-success{% else %}btn-danger{% endif %}">
+                            {{ profile.status|yesno:"Enabled,Disabled" }}
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    <a href="{% url 'edit_shop_admin' profile.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    <form action="{% url 'delete_shop_admin' profile.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this shop admin?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

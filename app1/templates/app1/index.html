@@ -1,24 +1,24 @@
-
 {% extends 'app1/base.html' %}
 {% load static %}
+
 {% block content %}
 <style>
-  *{
+  * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
+
   .Container {
     display: grid;
     justify-content: center;
     align-items: center;
     place-items: center;
-    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     width: 100%;
-    
-    
   }
+
   .box {
     width: 100%;
     height: 260px;
@@ -27,22 +27,37 @@
     overflow: hidden;
     box-shadow: 1px 1px 1px black;
   }
+
   .box img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-</style>
-<section>
+  .box {
+  display: flex;
+  justify-content: center;  /* Centers horizontally */
+  align-items: center;      /* Centers vertically */
+  
+  border: 1px solid black;  /* Optional border to see the box */
+  object-fit: cover;        /* Optional if you're dealing with images */
+}
 
+p {
+  margin: 0;  /* Ensures no default margins */
+}
+
+</style>
+
+<section>
     <div class="Container">
         {% for image in images %}
             <div class="box" style="margin-top: 2%;">
                 <img src="{{ image.image.url }}" alt="Featured Image">
             </div>
         {% empty %}
-            <div class="box" style="height: 100%; width: 100%; object-fit: cover;"></div>
-            <div class="box"></div>
+            <div class="box" style="height: 100%; width: 100%; object-fit: cover;"><p>No posters</p></div>
+            
+            <div class="box">No posters</p></div>
         {% endfor %}
     </div>
 </section>
