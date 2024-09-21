@@ -9,6 +9,11 @@ from .models import ShopAdminProfile, UploadedImage,UploadedImage
 from threading import Timer
 from .models import UploadedImage, ShopAdminProfile
 import threading
+import qrcode
+from django.utils.crypto import get_random_string
+import os
+from django.conf import settings
+from django.urls import reverse
 
 
 
@@ -50,7 +55,7 @@ def login_view(request):
 @login_required
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
-
+    
     if not shop_admin.status:
         logout(request)
         messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
@@ -59,15 +64,14 @@ def shop_admin_dashboard(request):
     if shop_admin.validity != 'running':
         messages.warning(request, 'Your payment is pending. Some features may be limited.')
 
-    # Using the related name to get uploaded images
-    images = shop_admin.uploaded_images.all()  # This is equivalent to UploadedImage.objects.filter(shop_admin_profile=shop_admin)
+    images = shop_admin.uploaded_images.all()
 
     if request.method == 'POST':
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
             new_image = form.save(commit=False)
             new_image.shop_admin_profile = shop_admin
-            new_image.display_order = images.count() + 1  # Using the count of the retrieved images
+            new_image.display_order = images.count() + 1
             new_image.save()
             messages.success(request, 'Image uploaded successfully!')
             return redirect('shop_admin_dashboard')
@@ -294,3 +298,61 @@ def delete_shop_admin(request, profile_id):
 
     messages.success(request, 'Shop admin deleted successfully!')
     return redirect('superuser_dashboard')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required
+def generate_qr_code(request):
+    shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
+    
+    # Generate a unique identifier for the shop admin if it doesn't exist
+    if not shop_admin.uid:
+        shop_admin.uid = get_random_string(length=20)
+        shop_admin.save()
+    
+    # Generate the URL for the shop admin's index page, including the UID
+    index_url = request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid}))
+    
+    # Create QR code instance
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(index_url)
+    qr.make(fit=True)
+    
+    # Create an image from the QR Code
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Save the image
+    qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')
+    os.makedirs(qr_code_dir, exist_ok=True)
+    file_name = f'qr_code_{shop_admin.uid}.png'
+    file_path = os.path.join(qr_code_dir, file_name)
+    img.save(file_path)
+    
+    # Save the QR code URL to the ShopAdminProfile
+    shop_admin.qr_code = os.path.join('qr_codes', file_name)
+    shop_admin.save()
+    
+    messages.success(request, 'QR Code generated successfully!')
+    return redirect('shop_admin_dashboard')
+
+
+
+
+@login_required
+def index_with_uid(request, uid):
+    shop_admin = get_object_or_404(ShopAdminProfile, uid=uid)
+    images = shop_admin.uploaded_images.all()
+    return render(request, 'app1/index.html', {'images': images, 'shop_admin': shop_admin})

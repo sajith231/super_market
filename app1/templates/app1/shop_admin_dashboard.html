@@ -111,21 +111,28 @@
     }
 </style>
 
+
 <div class="container">
     <div class="welcome-section">
         <h2>Welcome, {{ shop_admin.user.username }}!</h2>
-        <p class="welcome-message">Manage your shop with ease.</p>
+        <p>Manage your shop with ease.</p>
     </div>
-    
+
     <div class="sections-container">
         <div class="section qr-section">
             <h4>QR Code Generator</h4>
-            <button class="btn btn-success">Generate QR Code</button>
+            {% if shop_admin.qr_code %}
+                <img src="{{ shop_admin.qr_code.url }}" alt="Shop QR Code" class="img-thumbnail" style="width: 200px; height: 200px;">
+            {% endif %}
+            <form action="{% url 'generate_qr_code' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Generate QR Code</button>
+            </form>
         </div>
 
         <div class="section upload-section">
             <h4>Upload Image</h4>
-            <form method="post" enctype="multipart/form-data" >
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-primary">Upload</button>
@@ -135,13 +142,12 @@
         <div class="section image-gallery-section">
             <h4>Uploaded Images</h4>
             <p>Images displayed on the home page:</p>
-            
             <div class="image-gallery">
                 {% for image in images %}
                     <div class="image-item">
-                        <img src="{{ image.image.url }}" alt="{{ image.description }}" class="img-thumbnail" style="height: 50%; width: 50%;" >
+                        <img src="{{ image.image.url }}" alt="{{ image.description }}" class="img-thumbnail" style="height: 50%; width: 50%;">
                         <p>{{ image.description }}</p>
-                        <form method="POST" action="{% url 'delete_image' image.id %}">
+                        <form method="post" action="{% url 'delete_image' image.id %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>

@@ -23,7 +23,18 @@ urlpatterns = [
     path('toggle_status/<int:profile_id>/', views.toggle_status, name='toggle_status'),
     path('delete_shop_admin/<int:profile_id>/', delete_shop_admin, name='delete_shop_admin'),
     
+    
 
     # Other views
     path('index/', views.index, name='index'),
+
+
+
+
+
+
+    path('generate_qr_code/', views.generate_qr_code, name='generate_qr_code'),
+
+    path('generate_qr_code/', views.generate_qr_code, name='generate_qr_code'),
+    path('index/<str:uid>/', views.index_with_uid, name='index_with_uid'),
 ]
