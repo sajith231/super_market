@@ -2,6 +2,13 @@
 {% load static %}
 
 {% block content %}
+<style>
+    body {
+        background-color: #55608f;
+        color: #fff;
+        padding: 20px;
+    }
+</style>
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -21,6 +28,7 @@
 
                     <form method="POST" class="needs-validation" novalidate>
                         {% csrf_token %}
+                        {{ form.non_field_errors }}
                         
                         {% for field in form %}
                             <div class="mb-3">
@@ -50,7 +58,6 @@
 
 {% block extra_js %}
 <script>
-    // Form validation script (same as before)
     (function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
@@ -67,5 +74,4 @@
     })()
 </script>
 {% endblock %}
-
 {% endblock %}

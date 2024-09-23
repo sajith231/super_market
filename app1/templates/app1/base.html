@@ -31,7 +31,7 @@
   <div class="hero_area">
     <!-- Header section starts -->
     <header class="header_section">
-      <nav class="navbar navbar-expand-lg">
+      
         
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -41,28 +41,52 @@
           
           <div class="user_option">
             <div class="text-right mb-3">
-              <a href="{% url 'index' %}" class="btn">index</a>
-              <i class="fa fa-user" aria-hidden="true"></i>
+              
           </div>
-            {% if user.is_authenticated %}
-                <div class="text-right mb-3">
-                    <a href="{% url 'shop_admin_logout' %}" class="btn">Logout</a>
-                    
-                </div>
-            {% else %}
-                <a href="{% url 'shop_admin_login' %}">
-                    
-                    <span>Login</span>
-                </a>
-            {% endif %}
+           
         </div>
         <form class="form-inline">
-            <button class="btn nav_search-btn" type="submit">
-                <i class="fa fa-search" aria-hidden="true"></i>
+            <button class="btn nav_search-btn" type="submit" style="position: relative; display: flex; align-items: center;">
+              <input type="text" placeholder="Search" style="padding-top: 10px;padding-bottom: 10px;border-radius: 10px;">
+                <i class="fa fa-search" aria-hidden="true" style="position: absolute;right: 20px;"></i>
             </button>
         </form>
         </div>
       </nav>
+      
     </header>
+    
     {% block content %}{% endblock %}
     
+  <style>
+      
+      .card {
+          background-color: rgba(255, 255, 255, 0.9);
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      }
+      .card-header {
+          background-color: #55608f;
+          color: #fff;
+          padding: 20px;
+      }
+      
+      
+      .form-control {
+          background-color: rgba(255,255,255,0.8);
+          border: none;
+          border-radius: 5px;
+      }
+      .form-control:focus {
+          background-color: rgba(255,255,255,1);
+          box-shadow: 0 0 0 0.2rem rgba(85,96,143,0.25);
+      }
+      .btn-primary {
+          background-color: #55608f;
+          border-color: #55608f;
+      }
+      .btn-primary:hover {
+          background-color: #4a5579;
+          border-color: #4a5579;
+      }

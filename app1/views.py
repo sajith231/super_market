@@ -14,6 +14,12 @@ from django.utils.crypto import get_random_string
 import os
 from django.conf import settings
 from django.urls import reverse
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import ShopAdminProfile
+import os
+
 
 
 
@@ -96,14 +102,31 @@ def shop_admin_dashboard(request):
 def superuser_dashboard(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
-    shop_admin_profiles = ShopAdminProfile.objects.all()
-    return render(request, 'app1/superuser_dashboard.html', {'shop_admin_profiles': shop_admin_profiles})
 
-def change_validity_after_one_minute(profile):
-     import time
-     time.sleep(60)  # Wait for 1 minute
-     profile.validity = 'pending payment'
-     profile.save()
+    # Get the search query from the request
+    search_query = request.GET.get('search', '')
+
+    # Filter the shop admins based on the search query (case-insensitive)
+    if search_query:
+        shop_admin_profiles = ShopAdminProfile.objects.filter(shop_name__icontains=search_query)
+    else:
+        shop_admin_profiles = ShopAdminProfile.objects.all()
+
+    return render(request, 'app1/superuser_dashboard.html', {'shop_admin_profiles': shop_admin_profiles, 'search_query': search_query})
+
+
+
+
+
+def change_validity_after_one_minute(profile_id):
+    import time
+    time.sleep(60)  # Wait for 1 minute
+    try:
+        profile = ShopAdminProfile.objects.get(id=profile_id)
+        profile.validity = 'payment pending'
+        profile.save()
+    except ShopAdminProfile.DoesNotExist:
+        pass  # Handle the case where the profile might have been deleted
 
 
 
@@ -122,11 +145,15 @@ def create_shop_admin(request):
     if request.method == 'POST':
         form = ShopAdminCreationForm(request.POST)
         if form.is_valid():
-            shop_admin_profile = form.save()  # Save the User and ShopAdminProfile
+            shop_admin_profile = form.save(commit=False)  # Create the profile but don't save it yet
+            shop_admin_profile.status = True  # Set status to enabled
+            shop_admin_profile.validity = 'running'  # Set initial validity
+            shop_admin_profile.save()  # Now save the profile
+            
             messages.success(request, 'New Shop Admin created successfully!')
 
             # Start a thread to change the validity status after one minute
-            threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile,)).start()
+            threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile.id,)).start()
 
             return redirect('superuser_dashboard')  # Redirect to the superuser dashboard
         
@@ -147,17 +174,36 @@ def create_shop_admin(request):
 def edit_shop_admin(request, profile_id):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
-    
+
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
-    
+    user = profile.user  # Get the associated User object
+
     if request.method == 'POST':
         form = ShopAdminProfileForm(request.POST, instance=profile)
         if form.is_valid():
+            # Update the User object
+            user.username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            if password:
+                user.set_password(password)  # Update password if provided
+            user.save()  # Save the User object
+            
+            # Save the ShopAdminProfile
             form.save()
             messages.success(request, 'Shop admin profile updated successfully!')
             return redirect('superuser_dashboard')
     else:
-        form = ShopAdminProfileForm(instance=profile)
+        # Populate the form with current profile data
+        initial_data = {
+            'username': user.username,
+            'shop_name': profile.shop_name,
+            'address': profile.address,
+            'location': profile.location,
+            'phone_number': profile.phone_number,
+            'amount': profile.amount,
+            'responsible_person': profile.responsible_person,
+        }
+        form = ShopAdminProfileForm(initial=initial_data)
 
     return render(request, 'app1/edit_shop_admin.html', {'form': form, 'profile': profile})
 
@@ -178,9 +224,10 @@ def toggle_status(request, profile_id):
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
     profile.status = not profile.status
     profile.save()
-    status_text = "enabled" if profile.status else "disabled"
+    status_text = "disabled" if profile.status else "enabled"
     messages.success(request, f'Shop admin account has been {status_text}.')
     return redirect('superuser_dashboard')
+    
 
 
 
@@ -206,12 +253,22 @@ def delete_image(request, image_id):
 
 
 @login_required
-def toggle_featured(request, image_id):
-    image = get_object_or_404(UploadedImage, id=image_id)
-    image.is_featured = not image.is_featured
-    image.save()
-    messages.success(request, 'Image featured status updated.')
-    return redirect('shop_admin_dashboard')
+def toggle_status(request, profile_id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    profile = get_object_or_404(ShopAdminProfile, id=profile_id)
+    profile.status = not profile.status
+    
+    if profile.status:  # If the profile is being enabled
+        profile.validity = 'running'
+        # Start a thread to change the validity status after one minute
+        threading.Thread(target=change_validity_after_one_minute, args=(profile.id,)).start()
+    
+    profile.save()
+    status_text = "enabled" if profile.status else "disabled"
+    messages.success(request, f'Shop admin account has been {status_text}.')
+    return redirect('superuser_dashboard')
 
 
 
@@ -356,3 +413,19 @@ def index_with_uid(request, uid):
     shop_admin = get_object_or_404(ShopAdminProfile, uid=uid)
     images = shop_admin.uploaded_images.all()
     return render(request, 'app1/index.html', {'images': images, 'shop_admin': shop_admin})
+
+
+
+@login_required
+def download_qr_code(request):
+    shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
+    
+    if shop_admin.qr_code:
+        file_path = shop_admin.qr_code.path
+        if os.path.exists(file_path):
+            response = FileResponse(open(file_path, 'rb'))
+            response['Content-Disposition'] = f'attachment; filename="qr_code_{shop_admin.uid}.png"'
+            return response
+    
+    # If QR code doesn't exist or file is not found, redirect to generate QR code
+    return redirect('generate_qr_code')

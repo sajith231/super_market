@@ -6,6 +6,12 @@ from django.utils import timezone
     
 
 class ShopAdminProfile(models.Model):
+    VALIDITY_CHOICES = [
+        ('running', 'Running'),
+        ('payment pending', 'Payment Pending'),
+        # Add other validity statuses as needed
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
     shop_name = models.CharField(max_length=255)
@@ -15,9 +21,10 @@ class ShopAdminProfile(models.Model):
     status = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    validity = models.CharField(max_length=20, default='payment pending')
+    validity = models.CharField(max_length=20, choices=VALIDITY_CHOICES, default='payment pending')
     created_at = models.DateTimeField(default=timezone.now)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    responsible_person = models.CharField(max_length=255, null=True, blank=True)  # New field for responsible person
 
     def __str__(self):
         return self.shop_name

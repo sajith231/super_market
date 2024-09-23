@@ -37,4 +37,6 @@ urlpatterns = [
 
     path('generate_qr_code/', views.generate_qr_code, name='generate_qr_code'),
     path('index/<str:uid>/', views.index_with_uid, name='index_with_uid'),
+
+    path('download-qr-code/', views.download_qr_code, name='download_qr_code'),
 ]
