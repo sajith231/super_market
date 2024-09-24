@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-b5#1q6r01z9b2@^!3oyksd#+qw2nr9fn_98p+n3h@51r_4t1m_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['super-market-h0gf.onrender.com','localhost']
+ALLOWED_HOSTS = ['super-market-h0gf.onrender.com', 'localhost', '127.0.0.1']
+
 
 
 # Application definition
@@ -79,13 +81,14 @@ WSGI_APPLICATION = 'marketpro.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'super',
-        'USER':'supermarket',
-        'PASSWORD':'MyK2q9m5UVbyVDrIxyNih86On9Syl3j8',
-        'Host':'dpg-crp9jg2j1k6c73c28lhg-a.singapore-postgres.render.com',
-        'Port':'5432',
+        'NAME': 'super_xphb',
+        'USER': 'supermarket',
+        'PASSWORD': 'MyK2q9m5UVbyVDrIxyNih86On9Syl3j8',
+        'HOST': 'dpg-crp9jg2j1k6c73c28lhg-a.singapore-postgres.render.com',  # Corrected capitalization
+        'PORT': '5432',  # Corrected capitalization
     }
 }
+
 
 
 # Password validation
