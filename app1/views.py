@@ -190,7 +190,7 @@ def edit_shop_admin(request, profile_id):
             
             # Save the ShopAdminProfile
             form.save()
-            messages.success(request, 'Shop admin profile updated successfully!')
+            
             return redirect('superuser_dashboard')
     else:
         # Populate the form with current profile data
@@ -429,3 +429,63 @@ def download_qr_code(request):
     
     # If QR code doesn't exist or file is not found, redirect to generate QR code
     return redirect('generate_qr_code')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
