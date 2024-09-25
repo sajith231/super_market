@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: super-market-service
+    env: superenv
+    plan: starter  # adjust this based on your plan
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT marketpro.wsgi"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: "marketpro.settings"
+      - key: PORT
+        value: "8000"  # This will be set automatically by Render
+    databases:
+      - name: super  # adjust this to match your actual database name
+    autoDeploy: true
+    healthCheckPath: "/"
