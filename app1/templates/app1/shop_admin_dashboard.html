@@ -45,9 +45,9 @@
                 <p class="text-center">Images displayed on the home page:</p>
                 <div class="row row-cols-2 row-cols-md-4 g-4">
                     {% for image in images %}
-                        <div class="col">
-                            <div class="image-item card">
-                                <img src="{{ image.image.url }}" alt="{{ image.description }}" class="card-img-top" style="cursor: pointer;" onclick="showImage('{{ image.image.url }}', '{{ image.description }}')">
+                        <div class="col" style="display: grid;grid-template-columns: repeat(4, 1fr);">
+                            <div class="image-item card" style="width:300px;height: 500px;">
+                                <img src="{{ image.image.url }}" alt="{{ image.description }}" class="" style="cursor: pointer;width: 100%;height: 370px;object-fit: cover;" onclick="showImage('{{ image.image.url }}', '{{ image.description }}')">
                                 <div class="card-body">
                                     <p class="card-text">{{ image.description }}</p>
                                     <form method="post" action="{% url 'delete_image' image.id %}" style="position: relative; z-index: 100;">

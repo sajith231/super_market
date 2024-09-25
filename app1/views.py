@@ -103,10 +103,8 @@ def superuser_dashboard(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
 
-    # Get the search query from the request
     search_query = request.GET.get('search', '')
 
-    # Filter the shop admins based on the search query (case-insensitive)
     if search_query:
         shop_admin_profiles = ShopAdminProfile.objects.filter(shop_name__icontains=search_query)
     else:
@@ -346,15 +344,21 @@ def delete_shop_admin(request, profile_id):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
     
-    profile = get_object_or_404(ShopAdminProfile, id=profile_id)
+    try:
+        profile = ShopAdminProfile.objects.get(id=profile_id)
+        
+        if request.method == 'POST':
+            user = profile.user
+            profile.delete()
+            user.delete()  # Delete the associated User object
+            messages.success(request, 'Shop admin deleted successfully!')
+            return redirect('superuser_dashboard')
+        else:
+            return render(request, 'app1/confirm_delete_shop_admin.html', {'profile': profile})
     
-    # Optionally, you could also delete the associated user
-    user = profile.user
-    profile.delete()
-    user.delete()  # Delete the associated User object, if desired
-
-    messages.success(request, 'Shop admin deleted successfully!')
-    return redirect('superuser_dashboard')
+    except ShopAdminProfile.DoesNotExist:
+        messages.error(request, f'Shop admin with ID {profile_id} does not exist.')
+        return redirect('superuser_dashboard')
 
 
 

@@ -66,11 +66,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Superuser Dashboard</h2>
         
-            <div style="display: flex; justify-content: center; align-items: center;gap: 20px;">
-                <div style="position: relative;display: flex;align-items: center;">
-                    <!-- Add a form that submits the search query -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                <div style="position: relative; display: flex; align-items: center;">
                     <form method="get" action="{% url 'superuser_dashboard' %}">
-                        <input type="text" name="search" placeholder="Search Shop Name" value="{{ search_query }}" style="padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;border-radius: 10px;">
+                        <input type="text" name="search" placeholder="Search Shop Name" value="{{ search_query }}" style="padding: 10px; border-radius: 10px;">
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
                 </div>
@@ -83,12 +82,13 @@
             <table class="styled-table">
                 <thead>
                     <tr>
-                        <th>User ID</th>
+                        <th>#</th>  <!-- Index column -->
+                        <th>Uld</th>
                         <th>Shop Name</th>
                         <th>Address</th>
                         <th>Location</th>
                         <th>Username</th>
-                        <th>Responsible person.</th>
+                        <th>Responsible Person</th>
                         <th>Phone Number</th>
                         <th>Amount</th>
                         <th>Validity</th>
@@ -97,39 +97,40 @@
                     </tr>
                 </thead>
                 <tbody>
-    {% for profile in shop_admin_profiles %}
-    <tr>
-        <td>{{ profile.user.id }}</td> 
-        <td>{{ profile.shop_name }}</td>
-        <td>{{ profile.address }}</td>
-        <td>{{ profile.location }}</td>
-        <td>{{ profile.user.username }}</td>
-        <td>{{ profile.responsible_person }}</td>  <!-- Display the responsible person -->
-        <td>{{ profile.phone_number }}</td>
-        <td>{{ profile.amount }}</td>
-        <td class="{% if profile.validity == 'running' %}text-success{% else %}text-warning{% endif %}">
-            {{ profile.validity }}
-        </td>
-        <td>
-            <form action="{% url 'toggle_status' profile.id %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm {% if profile.status %}btn-success{% else %}btn-danger{% endif %}">
-                    {{ profile.status|yesno:"Enabled,Disabled" }}
-                </button>
-            </form>
-        </td>
-        <td>
-            <div class="btn-container">
-                <a href="{% url 'edit_shop_admin' profile.id %}" class="btn btn-sm btn-primary">Edit</a>
-                <form action="{% url 'delete_shop_admin' profile.id %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this shop admin?');">Delete</button>
-                </form>
-            </div>
-        </td>
-    </tr>
-    {% endfor %}
-</tbody>
+                    {% for profile in shop_admin_profiles %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>  <!-- Dynamic index number -->
+                        <td>{{ profile.uid }}</td>
+                        <td>{{ profile.shop_name }}</td>
+                        <td>{{ profile.address }}</td>
+                        <td>{{ profile.location }}</td>
+                        <td>{{ profile.user.username }}</td>
+                        <td>{{ profile.responsible_person }}</td>
+                        <td>{{ profile.phone_number }}</td>
+                        <td>{{ profile.amount }}</td>
+                        <td class="{% if profile.validity == 'running' %}text-success{% else %}text-warning{% endif %}">
+                            {{ profile.validity }}
+                        </td>
+                        <td>
+                            <form action="{% url 'toggle_status' profile.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if profile.status %}btn-success{% else %}btn-danger{% endif %}">
+                                    {{ profile.status|yesno:"Enabled,Disabled" }}
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="btn-container">
+                                <a href="{% url 'edit_shop_admin' profile.id %}" class="btn btn-sm btn-primary">Edit</a>
+                                <form action="{% url 'delete_shop_admin' profile.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this shop admin?');">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 
 
     
@@ -13,7 +14,7 @@ class ShopAdminProfile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    
     shop_name = models.CharField(max_length=255)
     address = models.TextField()
     location = models.CharField(max_length=255)
@@ -25,6 +26,12 @@ class ShopAdminProfile(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     responsible_person = models.CharField(max_length=255, null=True, blank=True)  # New field for responsible person
+    uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.uid:
+            self.uid = get_random_string(20)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.shop_name
