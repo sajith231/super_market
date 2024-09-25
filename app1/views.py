@@ -181,14 +181,18 @@ def edit_shop_admin(request, profile_id):
         if form.is_valid():
             # Update the User object
             user.username = form.cleaned_data['username']
+            
+            # Update password only if provided
             password = form.cleaned_data['password']
             if password:
                 user.set_password(password)  # Update password if provided
+            
             user.save()  # Save the User object
             
             # Save the ShopAdminProfile
             form.save()
             
+            messages.success(request, 'Shop admin profile updated successfully!')
             return redirect('superuser_dashboard')
     else:
         # Populate the form with current profile data

@@ -77,8 +77,9 @@ class ShopAdminProfileForm(forms.ModelForm):
     def clean_password(self):
         password = self.cleaned_data.get('password')
         if password:
-            return make_password(password)  # Hash the password if provided
+            return password  # Return the password without hashing here
         return None  # Return None to not change the password
+
     
 
 
