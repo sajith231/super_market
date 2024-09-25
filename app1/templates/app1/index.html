@@ -99,7 +99,7 @@
           <div class="carousel-inner" id="carouselImages">
             {% for image in images %}
               <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img src="{{ image.image.url }}" class="d-block w-100" alt="Image {{ forloop.counter }}">
+                <img src="{{ image.image.url }}" class="d-block w-100" alt="Image {{ forloop.counter }}"style="height: 100%;width:100% ;object-fit: contain;">
               </div>
             {% endfor %}
           </div>
