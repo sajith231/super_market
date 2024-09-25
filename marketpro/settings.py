@@ -23,11 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b5#1q6r01z9b2@^!3oyksd#+qw2nr9fn_98p+n3h@51r_4t1m_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # ALLOWED_HOSTS = ['super-market-h0gf.onrender.com','localhost']
-ALLOWED_HOSTS = ['super-market-h0gf.onrender.com']
+ALLOWED_HOSTS = ['super-market-8kml.onrender.com','localhost']
 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 
 # Application definition
