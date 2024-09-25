@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'marketpro.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'super',
+        'NAME': 'super_xphb',
         'USER': 'supermarket',
         'PASSWORD': 'MyK2q9m5UVbyVDrIxyNih86On9Syl3j8',
         'HOST': 'dpg-crp9jg2j1k6c73c28lhg-a.singapore-postgres.render.com',
