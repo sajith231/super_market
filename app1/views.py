@@ -19,7 +19,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import ShopAdminProfile
 import os
-
+from django.db import IntegrityError
+from django.contrib.auth.models import User
 
 
 
@@ -135,6 +136,13 @@ def change_validity_after_one_minute(profile_id):
 
 
 
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ShopAdminCreationForm
+from .models import User
+
 @login_required
 def create_shop_admin(request):
     if not request.user.is_superuser:
@@ -143,22 +151,27 @@ def create_shop_admin(request):
     if request.method == 'POST':
         form = ShopAdminCreationForm(request.POST)
         if form.is_valid():
-            shop_admin_profile = form.save(commit=False)  # Create the profile but don't save it yet
-            shop_admin_profile.status = True  # Set status to enabled
-            shop_admin_profile.validity = 'running'  # Set initial validity
-            shop_admin_profile.save()  # Now save the profile
+            username = form.cleaned_data['username']
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
+                return render(request, 'app1/create_shop_admin.html', {'form': form})
             
-            messages.success(request, 'New Shop Admin created successfully!')
-
-            # Start a thread to change the validity status after one minute
-            threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile.id,)).start()
-
-            return redirect('superuser_dashboard')  # Redirect to the superuser dashboard
-        
+            try:
+                shop_admin_profile = form.save(commit=False)
+                shop_admin_profile.status = True
+                shop_admin_profile.validity = 'running'
+                shop_admin_profile.save()
+                
+                messages.success(request, 'New Shop Admin created successfully!')
+                return redirect('superuser_dashboard')
+            except Exception as e:
+                messages.error(request, f'An error occurred while creating the shop admin: {str(e)}')
     else:
         form = ShopAdminCreationForm()
 
     return render(request, 'app1/create_shop_admin.html', {'form': form})
+
+    
 
 
 
