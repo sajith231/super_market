@@ -22,7 +22,7 @@ urlpatterns = [
     path('edit_shop_admin/<int:profile_id>/', views.edit_shop_admin, name='edit_shop_admin'),
     path('toggle_status/<int:profile_id>/', views.toggle_status, name='toggle_status'),
     path('delete_shop_admin/<int:profile_id>/', delete_shop_admin, name='delete_shop_admin'),
-    
+     path('logout/', shop_admin_logout, name='shop_admin_logout'),
     
 
     # Other views

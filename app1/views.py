@@ -159,8 +159,11 @@ def create_shop_admin(request):
             try:
                 shop_admin_profile = form.save(commit=False)
                 shop_admin_profile.status = True
-                shop_admin_profile.validity = 'running'
+                shop_admin_profile.validity = 'running'  # Set status to running
                 shop_admin_profile.save()
+                
+                # Start a thread to change the validity status after one minute
+                threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile.id,)).start()
                 
                 messages.success(request, 'New Shop Admin created successfully!')
                 return redirect('superuser_dashboard')
@@ -170,6 +173,16 @@ def create_shop_admin(request):
         form = ShopAdminCreationForm()
 
     return render(request, 'app1/create_shop_admin.html', {'form': form})
+
+def change_validity_after_one_minute(profile_id):
+    import time
+    time.sleep(60)  # Wait for 1 minute
+    try:
+        profile = ShopAdminProfile.objects.get(id=profile_id)
+        profile.validity = 'payment pending'  # Change status to payment pending
+        profile.save()
+    except ShopAdminProfile.DoesNotExist:
+        pass  # Handle the case where the profile might have been deleted
 
     
 
