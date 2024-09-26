@@ -62,7 +62,7 @@ def login_view(request):
 @login_required
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
-    
+
     if not shop_admin.status:
         logout(request)
         messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
@@ -90,6 +90,7 @@ def shop_admin_dashboard(request):
         'images': images,
         'shop_admin': shop_admin
     })
+
 
 
 

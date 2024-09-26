@@ -4,11 +4,12 @@
 {% block content %}
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<div class="container py-4">
-    <a href="{% url 'index' %}" class="btn btn-primary mb-3">View Index Page</a>
-    <a href="{% url 'shop_admin_logout' %}" class="btn btn-primary mb-3" style="background-color: red; margin-left: 70%;">Logout</a>
-</div>
+<div class="container py-4"></div>
+    <h2>Welcome, <span style="color: green;">{{ shop_admin.user.username }}!</span></h2>
+    <div style="display: flex;align-items: center;gap: 10px;">
+        <a href="{% url 'index' %}" class="btn btn-primary mb-3">View Index Page</a>
+        <a href="{% url 'shop_admin_logout' %}" class="btn btn-primary mb-3" style="background-color: red;">Logout</a>
+    </div>
 
 
 <div class="row g-4 justify-content-center">
