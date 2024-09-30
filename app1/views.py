@@ -23,7 +23,6 @@ from django.db import IntegrityError
 from django.contrib.auth.models import User
 
 
-
 def login_view(request):
     if request.method == 'POST':
         form = ShopAdminLoginForm(request.POST)
@@ -53,12 +52,6 @@ def login_view(request):
     return render(request, 'app1/shop_admin_login.html', {'form': form})
 
 
-
-
-
-
-
-
 @login_required
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
@@ -72,33 +65,67 @@ def shop_admin_dashboard(request):
         messages.warning(request, 'Your payment is pending. Some features may be limited.')
 
     images = shop_admin.uploaded_images.all()
+    form = ImageUploadForm()
 
     if request.method == 'POST':
-        form = ImageUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            new_image = form.save(commit=False)
-            new_image.shop_admin_profile = shop_admin
-            new_image.display_order = images.count() + 1
-            new_image.save()
-            messages.success(request, 'Image uploaded successfully!')
-            return redirect('shop_admin_dashboard')
-    else:
-        form = ImageUploadForm()
+        if 'upload_logo' in request.POST:
+            if request.FILES.get('shop_logo'):
+                shop_admin.logo = request.FILES['shop_logo']
+                shop_admin.save()
+                messages.success(request, 'Shop logo uploaded successfully!')
+        elif 'generate_qr' in request.POST:
+            threading.Thread(target=generate_qr_code_async, args=(request, shop_admin.id)).start()
+            messages.success(request, 'QR Code generation started. It will be available soon.')
+        else:
+            form = ImageUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                new_image = form.save(commit=False)
+                new_image.shop_admin_profile = shop_admin
+                new_image.display_order = images.count() + 1
+                new_image.save()
+                messages.success(request, 'Image uploaded successfully!')
+                return redirect('shop_admin_dashboard')
 
-    return render(request, 'app1/shop_admin_dashboard.html', {
+    context = {
         'form': form,
         'images': images,
-        'shop_admin': shop_admin
-    })
+        'shop_admin': shop_admin,
+        'qr_code_url': request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid}))
+    }
+
+    return render(request, 'app1/shop_admin_dashboard.html', context)
 
 
+def generate_qr_code_async(request, shop_admin_id):
+    from django.urls import reverse
+    from django.utils.crypto import get_random_string
+    import qrcode
+    import os
+    from django.conf import settings
 
-
-
-
-
-
-
+    shop_admin = ShopAdminProfile.objects.get(id=shop_admin_id)     #34567876545678765678765678765
+    index_url = f"http://YOUR_IP_ADDRESS:8000{reverse('index_with_uid', kwargs={'uid': shop_admin.uid})}"
+    if not shop_admin.uid:
+        shop_admin.uid = get_random_string(length=20)
+        shop_admin.save()
+    
+    index_url = request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid}))
+    
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(index_url)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')
+    os.makedirs(qr_code_dir, exist_ok=True)
+    file_name = f'qr_code_{shop_admin.uid}.png'
+    file_path = os.path.join(qr_code_dir, file_name)
+    img.save(file_path)
+    
+    shop_admin.qr_code = os.path.join('qr_codes', file_name)
+    shop_admin.save()
+    
 
 @login_required
 def superuser_dashboard(request):
@@ -114,10 +141,6 @@ def superuser_dashboard(request):
 
     return render(request, 'app1/superuser_dashboard.html', {'shop_admin_profiles': shop_admin_profiles, 'search_query': search_query})
 
-
-
-
-
 def change_validity_after_one_minute(profile_id):
     import time
     time.sleep(60)  # Wait for 1 minute
@@ -128,21 +151,6 @@ def change_validity_after_one_minute(profile_id):
     except ShopAdminProfile.DoesNotExist:
         pass  # Handle the case where the profile might have been deleted
 
-
-
-
-
-
-
-
-
-
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import ShopAdminCreationForm
-from .models import User
 
 @login_required
 def create_shop_admin(request):
@@ -174,22 +182,6 @@ def create_shop_admin(request):
         form = ShopAdminCreationForm()
 
     return render(request, 'app1/create_shop_admin.html', {'form': form})
-
-def change_validity_after_one_minute(profile_id):
-    import time
-    time.sleep(60)  # Wait for 1 minute
-    try:
-        profile = ShopAdminProfile.objects.get(id=profile_id)
-        profile.validity = 'payment pending'  # Change status to payment pending
-        profile.save()
-    except ShopAdminProfile.DoesNotExist:
-        pass  # Handle the case where the profile might have been deleted
-
-    
-
-
-
-
 
 
 
@@ -237,14 +229,6 @@ def edit_shop_admin(request, profile_id):
     return render(request, 'app1/edit_shop_admin.html', {'form': form, 'profile': profile})
 
 
-
-
-
-
-
-
-
-
 @login_required
 def toggle_status(request, profile_id):
     if not request.user.is_superuser:
@@ -258,14 +242,6 @@ def toggle_status(request, profile_id):
     return redirect('superuser_dashboard')
     
 
-
-
-
-
-
-
-
-
 @login_required
 def delete_image(request, image_id):
     image = get_object_or_404(UploadedImage, id=image_id)
@@ -274,11 +250,6 @@ def delete_image(request, image_id):
         messages.success(request, 'Image deleted successfully.')
         return redirect('shop_admin_dashboard')
     return render(request, 'app1/confirm_delete.html', {'image': image})
-
-
-
-
-
 
 
 @login_required
@@ -300,32 +271,16 @@ def toggle_status(request, profile_id):
     return redirect('superuser_dashboard')
 
 
-
-
-
-
-
 def shop_admin_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('shop_admin_login')
 
 
-
-
-
 def superuser_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('shop_admin_login')
-
-
-
-
-
-
-
-
 
 
 @login_required
@@ -346,11 +301,6 @@ def upload_image_view(request):  # Changed the name from `UploadedImage` to `upl
     return render(request, 'app1/upload_image.html', {'form': form})
 
 
-
-
-
-
-
 @login_required
 def index(request):
     try:
@@ -366,9 +316,6 @@ def index(request):
         # If the user doesn't have a shop admin profile, redirect them or show an error
         return redirect('shop_admin_login')
     
-
-
-
 
 @login_required
 def delete_shop_admin(request, profile_id):
@@ -390,19 +337,6 @@ def delete_shop_admin(request, profile_id):
     except ShopAdminProfile.DoesNotExist:
         messages.error(request, f'Shop admin with ID {profile_id} does not exist.')
         return redirect('superuser_dashboard')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -441,13 +375,20 @@ def generate_qr_code(request):
     return redirect('shop_admin_dashboard')
 
 
-
-
-@login_required
 def index_with_uid(request, uid):
     shop_admin = get_object_or_404(ShopAdminProfile, uid=uid)
     images = shop_admin.uploaded_images.all()
-    return render(request, 'app1/index.html', {'images': images, 'shop_admin': shop_admin})
+    context = {
+        'images': images,
+        'shop_admin': shop_admin,
+        'footer_details': {
+            'shop_name': shop_admin.shop_name,
+            'address': shop_admin.address,
+            'phone_number': shop_admin.phone_number,
+            'location': shop_admin.location,
+        }
+    }
+    return render(request, 'app1/index.html', context)
 
 
 
@@ -519,7 +460,15 @@ def download_qr_code(request):
 
 
 
-
+def change_validity_after_one_minute(profile_id):
+    import time
+    time.sleep(60)  # Wait for 1 minute
+    try:
+        profile = ShopAdminProfile.objects.get(id=profile_id)
+        profile.validity = 'payment pending'  # Change status to payment pending
+        profile.save()
+    except ShopAdminProfile.DoesNotExist:
+        pass  # Handle the case where the profile might have been deleted
 
 
 

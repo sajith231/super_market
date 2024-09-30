@@ -18,7 +18,7 @@ class ShopAdminProfile(models.Model):
     shop_name = models.CharField(max_length=255)
     address = models.TextField()
     location = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15) 
     status = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -27,6 +27,7 @@ class ShopAdminProfile(models.Model):
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     responsible_person = models.CharField(max_length=255, null=True, blank=True)  # New field for responsible person
     uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    logo = models.ImageField(upload_to='shop_logos/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.uid:

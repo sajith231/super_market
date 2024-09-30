@@ -10,14 +10,7 @@
                     <h2 class="text-center mb-0">Create New Shop Admin</h2>
                 </div>
                 <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+                    
 
                     <form method="POST" class="needs-validation" novalidate>
                         {% csrf_token %}

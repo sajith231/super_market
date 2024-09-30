@@ -1,153 +1,210 @@
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ shop_admin.shop_name }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            width: 100%;
+            background-color: #f8f9fa;
+            padding: 20px 0;
+        }
+        .header-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+        .footer-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        /* Responsive carousel images */
+        .carousel-item img {
+            width: 100vw;
+            height: 60vh;
+            object-fit: cover;
+            border-radius: 20px;
+        }
 
-{% block content %}
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+        /* Adjust the carousel height based on screen size */
+        @media (min-width: 768px) {
+            .carousel-item img {
+                height: 70vh; /* Increase height for medium and larger screens */
+            }
+        }
 
-  body {
-    background-color: #55608f;
-    color: #fff;
-    padding: 20px;
-  }
+        @media (min-width: 1200px) {
+            .carousel-item img {
+                height: 80vh; /* Further increase height for larger screens */
+            }
+        }
 
-  .Container {
-    display: grid;
-    justify-content: center;
-    align-items: center;
-    place-items: center;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    width: 100%;
-  }
+        /* Modal carousel full-screen adjustment */
+        .modal-body img {
+            width: 100%;
+            height: 85vh;
+            object-fit: cover;
+        }
 
-  .box {
-    width: 100%;
-    height: 270px;
-    border-radius: 20px;
-    background-color: #109dbd;
-    overflow: hidden;
-    box-shadow: 1px 1px 1px black;
-    display: flex;
-    justify-content: center; /* Centers horizontally */
-    align-items: center;     /* Centers vertically */
-    border: 1px solid black; /* Optional border to see the box */
-  }
-  @media screen and (min-width:1024px) {
-    .Container{
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    .box{
-      height: 400px;
-      width: 100%;
-    }
-  }
-
-  .box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer; /* Pointer on hover */
-  }
-
-  p {
-    margin: 0; /* Ensures no default margins */
-    color: white; /* White text to contrast with black background */
-  }
-
-  .modal-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-body img {
-    width: 100%;
-    height: auto; /* Maintain aspect ratio */
-    max-height: 90vh; /* Limit max height for mobile view */
-    object-fit: contain; /* Ensure the image fits within the modal */
-  }
-</style>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<section>
-  <div class="Container">
-    {% for image in images %}
-      <div class="box" style="margin-top: 2%;">
-        <img src="{{ image.image.url }}" alt="Featured Image" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="{{ image.image.url }}" data-index="{{ forloop.counter }}">
-      </div>
-    {% empty %}
-      <div class="box" style="height: 100%; width: 100%; object-fit: cover;"><p>No posters</p></div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- Modal -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true" style="background: rgba(0, 0, 0, 0.8);">
-  <div class="modal-dialog modal-fullscreen">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="imageModalLabel">Image Gallery</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner" id="carouselImages">
-            {% for image in images %}
-              <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img src="{{ image.image.url }}" class="d-block w-100" alt="Image {{ forloop.counter }}"style="height: 100%;width:100% ;object-fit: contain;">
-              </div>
-            {% endfor %}
-          </div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-          </button>
+        @media (min-width: 768px) {
+            .modal-body img {
+                height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                {% if shop_admin.logo %}
+                <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px; object-fit: contain;margin-left: 2%;">
+                {% endif %}
+            </div>
+            <div class="header-text">
+                <h2 ><b>{{ shop_admin.shop_name|capfirst }}</b></h2>
+                <b style="margin-left: 10%;">{{ shop_admin.location|capfirst }}</b>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
+    </header>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const carouselImages = document.getElementById('carouselImages');
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    <main class="main-content">
+        <h3 style="text-align: center;">Our Offers</h3>
+        <div id="imageCarousel" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                {% for image in images %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" onclick="openModal({{ forloop.counter0 }})">
+                    </div>
+                {% empty %}
+                    <div class="carousel-item active">
+                        <img src="https://via.placeholder.com/800x600" alt="No Posters Available" class="d-block w-100">
+                    </div>
+                {% endfor %}
+            </div>
+            <a class="carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#imageCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
 
-    // Show the clicked image in the carousel
-    document.querySelectorAll('.box img').forEach((img, index) => {
-      img.addEventListener('click', function () {
-        // Activate the clicked image in the carousel
-        const items = carouselImages.getElementsByClassName('carousel-item');
-        for (let i = 0; i < items.length; i++) {
-          items[i].classList.remove('active');
+        <!-- Modal for Fullscreen Carousel -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">{{ shop_admin.shop_name }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modalCarousel" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for image in images %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100 zoomable-image" style="width: 600px; height: 550px;">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <a class="carousel-control-prev" href="#modalCarousel" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#modalCarousel" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            {% if shop_admin.logo %}
+                <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 90px; object-fit: contain;">
+            {% endif %}
+            <h2><b>{{ shop_admin.shop_name|capfirst }}</b></h2>
+            <p>{{ shop_admin.address }}</p>
+            <p>{{ shop_admin.phone_number }}</p>
+            <p>{{ shop_admin.location|title }}</p>
+            <p>&copy; {% now "Y" %} {{ shop_admin.shop_name }}. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- jQuery and Bootstrap Bundle -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        function openModal(index) {
+            $('#modalCarousel').carousel(index);
+            $('#imageModal').modal('show');
         }
-        items[index].classList.add('active'); // Set clicked image as active
+        // Double-tap or double-click zoom functionality
+    document.querySelectorAll('.zoomable-image').forEach(image => {
+        let scale = 1;
 
-        // Show the modal
-        modal.show();
-      });
+        image.addEventListener('dblclick', function() {
+            if (scale === 1) {
+                scale = 2; // Zoom in
+                this.style.transform = `scale(${scale})`;
+                this.style.transition = 'transform 0.3s ease'; // Smooth zoom
+            } else {
+                scale = 1; // Reset zoom
+                this.style.transform = 'scale(1)';
+            }
+        });
+
+        image.addEventListener('touchstart', function(event) {
+            if (event.touches.length === 2) {
+                if (scale === 1) {
+                    scale = 2;
+                    this.style.transform = `scale(${scale})`;
+                    this.style.transition = 'transform 0.3s ease';
+                } else {
+                    scale = 1;
+                    this.style.transform = 'scale(1)';
+                }
+            }
+        });
     });
-
-    // Keyboard navigation for carousel
-    document.addEventListener('keydown', function (event) {
-      if (modal._isShown) { // Check if the modal is open
-        if (event.key === 'ArrowLeft') {
-          carouselImages.querySelector('.carousel-control-prev').click();
-        } else if (event.key === 'ArrowRight') {
-          carouselImages.querySelector('.carousel-control-next').click();
-        }
-      }
-    });
-  });
-</script>
-
-{% endblock %}
+    </script>
+</body>
+</html>
