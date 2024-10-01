@@ -13,100 +13,159 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            background-color: #f4f4f4;
         }
+
         .header {
             width: 100%;
-            background-color: #f8f9fa;
+            background-color: #343a40;
+            color: #ffffff;
             padding: 20px 0;
         }
+
         .header-content {
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
         }
+
+        .header-logo {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 20px;
+        }
+
         .main-content {
             flex: 1;
             padding: 20px;
-        }
-        .footer {
-            background-color: #f8f9fa;
-            padding: 20px 0;
-            margin-top: auto;
-        }
-        .footer-content {
-            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            text-align: center;
-        }
-        
-        /* Responsive carousel images */
-        .carousel-item img {
-            width: 100vw;
-            height: 60vh;
-            object-fit: cover;
-            border-radius: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
         }
 
-        /* Adjust the carousel height based on screen size */
+        .carousel-item img {
+            width: 100vw;
+            height: 40vh;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
         @media (min-width: 768px) {
             .carousel-item img {
-                height: 70vh; /* Increase height for medium and larger screens */
+                height: 70vh;
             }
         }
 
         @media (min-width: 1200px) {
             .carousel-item img {
-                height: 80vh; /* Further increase height for larger screens */
+                height: 80vh;
             }
         }
 
-        /* Modal carousel full-screen adjustment */
-        .modal-body img {
-            width: 100%;
-            height: 85vh;
-            object-fit: cover;
+        .footer {
+            background-color: white;
+            padding: 20px;
+            margin-top: auto;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        .footer-content {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            fill: #22c55e;
+        }
+        .contact-text {
+            color: #333;
+            line-height: 1.4;
+        }
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+        }
+        .social-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
         }
 
-        @media (min-width: 768px) {
-            .modal-body img {
-                height: 90vh;
-            }
+        .carousel-indicators {
+            bottom: -30px; /* Adjust position of dots */
+        }
+
+        .carousel-indicators li {
+            background-color: black; /* Dots color */
+            border-radius: 50%; /* Make them circular */
+            width: 12px; /* Size of the dots */
+            height: 12px; /* Size of the dots */
+        }
+
+        .carousel-indicators .active {
+            background-color: #22c55e; /* Active dot color */
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-container">
+    <header>
+        <div class="header-content row justify-content-center align-items-center py-4">
+            <div class="col-4 text-center">
                 {% if shop_admin.logo %}
-                <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px; object-fit: contain;margin-left: 2%;">
+                    <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px;">
+                    <h4 class="mt-3 mb-1">{{ shop_admin.shop_name|capfirst|upper }}</h4>
+                    <p class="mb-0" style="font-size: 1rem; letter-spacing: 0.5px;">{{ shop_admin.location|capfirst }}</p>
                 {% endif %}
-            </div>
-            <div class="header-text">
-                <h2 ><b>{{ shop_admin.shop_name|capfirst }}</b></h2>
-                <b style="margin-left: 10%;">{{ shop_admin.location|capfirst }}</b>
             </div>
         </div>
     </header>
 
     <main class="main-content">
-        <h3 style="text-align: center;">Our Offers</h3>
         <div id="imageCarousel" class="carousel slide" data-ride="carousel">
+            <h2 >Hot Deals</h2> <!-- Center the title -->
             <div class="carousel-inner">
                 {% for image in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" onclick="openModal({{ forloop.counter0 }})">
+                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="object-fit: cover; height: 300px;" onclick="openModal({{ forloop.counter0 }})">
                     </div>
                 {% empty %}
                     <div class="carousel-item active">
-                        <img src="https://via.placeholder.com/800x600" alt="No Posters Available" class="d-block w-100">
+                        <img src="https://via.placeholder.com/800x600" alt="No Posters Available" class="d-block w-100" style="height: 300px;">
                     </div>
                 {% endfor %}
             </div>
+    
+            {% if images|length > 1 %}
+                <ol class="carousel-indicators">
+                    {% for image in images %}
+                        <li data-target="#imageCarousel" data-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></li>
+                    {% endfor %}
+                </ol>
+            {% endif %}
+    
             <a class="carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="sr-only">Previous</span>
@@ -117,10 +176,9 @@
             </a>
         </div>
 
-        <!-- Modal for Fullscreen Carousel -->
         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
+                <div class="modal-content" style="height: 95%;">
                     <div class="modal-header">
                         <h5 class="modal-title" id="imageModalLabel">{{ shop_admin.shop_name }}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -132,7 +190,7 @@
                             <div class="carousel-inner">
                                 {% for image in images %}
                                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100 zoomable-image" style="width: 600px; height: 550px;">
+                                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="height: calc(100vh - 150px); object-fit: contain;">
                                     </div>
                                 {% endfor %}
                             </div>
@@ -153,23 +211,36 @@
 
     <footer class="footer">
         <div class="footer-content">
-            {% if shop_admin.logo %}
-                <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 90px; object-fit: contain;">
-            {% endif %}
-            <h2><b>{{ shop_admin.shop_name|capfirst }}</b></h2>
-            <p>{{ shop_admin.address }}</p>
-            <p>{{ shop_admin.phone_number }}</p>
-            <p>{{ shop_admin.location|title }}</p>
-            <p>&copy; {% now "Y" %} {{ shop_admin.shop_name }}. All rights reserved.</p>
+            <div class="contact-item">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <span class="contact-text">{{ shop_admin.phone_number }}</span>
+            </div>
+            
+            <div class="contact-item">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span class="contact-text">{{ shop_admin.address }}</span>
+            </div>
+        </div>
+    
+        <div class="footer-bottom">
+            <p>
+                Developed and designed by <span style="color: #22c55e;">IMC Business Solutions</span> | 
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 1em; height: 1em; vertical-align: middle;">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                : 9061947005
+            </p>
         </div>
     </footer>
+    
 
-    <!-- jQuery and Bootstrap Bundle -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
@@ -177,34 +248,6 @@
             $('#modalCarousel').carousel(index);
             $('#imageModal').modal('show');
         }
-        // Double-tap or double-click zoom functionality
-    document.querySelectorAll('.zoomable-image').forEach(image => {
-        let scale = 1;
-
-        image.addEventListener('dblclick', function() {
-            if (scale === 1) {
-                scale = 2; // Zoom in
-                this.style.transform = `scale(${scale})`;
-                this.style.transition = 'transform 0.3s ease'; // Smooth zoom
-            } else {
-                scale = 1; // Reset zoom
-                this.style.transform = 'scale(1)';
-            }
-        });
-
-        image.addEventListener('touchstart', function(event) {
-            if (event.touches.length === 2) {
-                if (scale === 1) {
-                    scale = 2;
-                    this.style.transform = `scale(${scale})`;
-                    this.style.transition = 'transform 0.3s ease';
-                } else {
-                    scale = 1;
-                    this.style.transform = 'scale(1)';
-                }
-            }
-        });
-    });
     </script>
 </body>
 </html>

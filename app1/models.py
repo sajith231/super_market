@@ -14,24 +14,25 @@ class ShopAdminProfile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
     shop_name = models.CharField(max_length=255)
     address = models.TextField()
     location = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15) 
+    phone_number = models.CharField(max_length=15)
     status = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    validity = models.CharField(max_length=20, choices=VALIDITY_CHOICES, default='payment pending')
+    validity = models.CharField(max_length=20, choices=VALIDITY_CHOICES, default='running')
     created_at = models.DateTimeField(default=timezone.now)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
-    responsible_person = models.CharField(max_length=255, null=True, blank=True)  # New field for responsible person
+    responsible_person = models.CharField(max_length=255, null=True, blank=True)
     uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
     logo = models.ImageField(upload_to='shop_logos/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = get_random_string(20)
+        if self.validity == 'payment pending':
+            self.status = False
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -18,49 +18,26 @@
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        width: 100%; /* Full width to accommodate the table */
+        width: 100%;
     }
     .table-container {
-        overflow-x: auto; /* Enables horizontal scrolling */
-        overflow-y: hidden; /* Disable vertical scrolling */
+        overflow-x: auto;
         margin-top: 20px;
-        white-space: nowrap; /* Prevents table columns from wrapping to new lines */
-    }
-    .styled-table {
-        width: 100%;
-        border-collapse: collapse;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    .styled-table th,
-    .styled-table td {
-        padding: 15px;
-        background-color: rgba(255,255,255,0.2);
-        color: #333;
-    }
-    .styled-table th {
-        text-align: left;
-        background-color: #55608f;
-        color: #fff;
-    }
-    .styled-table tbody tr:hover {
-        background-color: rgba(255,255,255,0.3);
-    }
-    .styled-table td {
-        position: relative;
-    }
-    .styled-table td:hover::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: -9999px;
-        bottom: -9999px;
-        background-color: rgba(255,255,255,0.2);
-        z-index: -1;
     }
     .btn-container {
         display: flex;
         gap: 5px;
+    }
+    .table {
+        width: 100%;
+    }
+    .status-running {
+        color: green;
+        font-weight: bold;
+    }
+    .status-pending {
+        color: red;
+        font-weight: bold;
     }
 </style>
 
@@ -68,70 +45,73 @@
     <div class="dashboard-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Superuser Dashboard</h2>
-        
             <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
-                <div style="position: relative; display: flex; align-items: center;">
-                    <form method="get" action="{% url 'superuser_dashboard' %}">
-                        <input type="text" name="search" placeholder="Search Shop Name" value="{{ search_query }}" style="padding: 10px; border-radius: 10px;">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                    </form>
-                </div>
+                <form method="get" action="{% url 'superuser_dashboard' %}" class="form-inline">
+                    <input type="text" name="search" class="form-control mr-sm-2" placeholder="Search shop name" value="{{ search_query }}">
+                    <select name="status" class="form-control mr-sm-2">
+                        <option value="">All Statuses</option>
+                        <option value="enabled" {% if status_filter == 'enabled' %}selected{% endif %}>Enabled</option>
+                        <option value="disabled" {% if status_filter == 'disabled' %}selected{% endif %}>Disabled</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Filter</button>
+                </form>
                 <a href="{% url 'superuser_logout' %}" class="btn btn-danger">Logout</a>
             </div>
         </div>
+
         <a href="{% url 'create_shop_admin' %}" class="btn btn-primary mb-3">Create New Shop Admin</a>
-        
+
         <div class="table-container">
-            <table class="styled-table">
+            <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>#</th>  <!-- Index column -->
-                        <th>Uld</th>
+                        <th>#</th>
+                        <th>Uid</th>
                         <th>Shop Name</th>
-                        <th>Address</th>
                         <th>Location</th>
-                        <th>Username</th>
+                        <th>Address</th>
                         <th>Responsible Person</th>
                         <th>Phone Number</th>
                         <th>Amount</th>
+                        <th>Username</th>
                         <th>Validity</th>
                         <th>Status</th>
                         <th>Actions</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
                     {% for profile in shop_admin_profiles %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>  <!-- Dynamic index number -->
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ profile.uid }}</td>
                         <td>{{ profile.shop_name }}</td>
-                        <td>{{ profile.address }}</td>
                         <td>{{ profile.location }}</td>
-                        <td>{{ profile.user.username }}</td>
-                        
+                        <td>{{ profile.address }}</td>
                         <td>{{ profile.responsible_person }}</td>
                         <td>{{ profile.phone_number }}</td>
                         <td>{{ profile.amount }}</td>
-                        <td class="{% if profile.validity == 'running' %}text-success{% else %}text-warning{% endif %}">
-                            {{ profile.validity }}
+                        <td>{{ profile.user.username }}</td>
+                        <td>
+                            {% if profile.validity == 'running' %}
+                                <span class="status-running">Active</span>
+                            {% else %}
+                                <span class="status-pending">Payment Pending</span>
+                            {% endif %}
                         </td>
                         <td>
-                            <form action="{% url 'toggle_status' profile.id %}" method="post" style="display:inline;">
+                            <form method="post" action="{% url 'toggle_status' profile.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm {% if profile.status %}btn-success{% else %}btn-danger{% endif %}">
-                                    {{ profile.status|yesno:"Enabled,Disabled" }}
+                                    {% if profile.status %}Enabled{% else %}Disabled{% endif %}
                                 </button>
                             </form>
                         </td>
-                        <td>
-                            <div class="btn-container">
-                                <a href="{% url 'edit_shop_admin' profile.id %}" class="btn btn-sm btn-primary">Edit</a>
-                                <form action="{% url 'delete_shop_admin' profile.id %}" method="post" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this shop admin?');">Delete</button>
-                                </form>
-                            </div>
+                        <td class="btn-container">
+                            <a href="{% url 'edit_shop_admin' profile.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            <form method="post" action="{% url 'delete_shop_admin' profile.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this shop admin?')">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}

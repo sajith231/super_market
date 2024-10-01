@@ -32,13 +32,14 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
-                login(request, user)
                 if user.is_superuser:
+                    login(request, user)
                     return redirect('superuser_dashboard')
                 else:
                     try:
                         shop_admin_profile = ShopAdminProfile.objects.get(user=user)
                         if shop_admin_profile.status:
+                            login(request, user)
                             return redirect('shop_admin_dashboard')
                         else:
                             messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
@@ -61,8 +62,11 @@ def shop_admin_dashboard(request):
         messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
         return redirect('shop_admin_login')
 
-    if shop_admin.validity != 'running':
+    if shop_admin.validity == 'payment pending':
         messages.warning(request, 'Your payment is pending. Some features may be limited.')
+        can_edit = False  # Disable editing when payment is pending
+    else:
+        can_edit = True  # Allow editing otherwise
 
     images = shop_admin.uploaded_images.all()
     form = ImageUploadForm()
@@ -90,7 +94,8 @@ def shop_admin_dashboard(request):
         'form': form,
         'images': images,
         'shop_admin': shop_admin,
-        'qr_code_url': request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid}))
+        'qr_code_url': request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid})),
+        'can_edit': can_edit,  # Pass edit permission to template
     }
 
     return render(request, 'app1/shop_admin_dashboard.html', context)
@@ -133,23 +138,40 @@ def superuser_dashboard(request):
         return HttpResponseForbidden("You don't have permission to access this page.")
 
     search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')  # Get the status filter
 
+    shop_admin_profiles = ShopAdminProfile.objects.all()
+
+    # Apply the search filter
     if search_query:
-        shop_admin_profiles = ShopAdminProfile.objects.filter(shop_name__icontains=search_query)
-    else:
-        shop_admin_profiles = ShopAdminProfile.objects.all()
+        shop_admin_profiles = shop_admin_profiles.filter(shop_name__icontains=search_query)
 
-    return render(request, 'app1/superuser_dashboard.html', {'shop_admin_profiles': shop_admin_profiles, 'search_query': search_query})
+    # Apply the status filter
+    if status_filter:
+        if status_filter == 'enabled':
+            shop_admin_profiles = shop_admin_profiles.filter(status=True)
+        elif status_filter == 'disabled':
+            shop_admin_profiles = shop_admin_profiles.filter(status=False)
+
+    return render(request, 'app1/superuser_dashboard.html', {
+        'shop_admin_profiles': shop_admin_profiles,
+        'search_query': search_query,
+        'status_filter': status_filter  # Pass the status filter to the template
+    })
+
+
+
 
 def change_validity_after_one_minute(profile_id):
     import time
-    time.sleep(60)  # Wait for 1 minute
+    time.sleep(600)  # Wait for 10 minutes (600 seconds)
     try:
         profile = ShopAdminProfile.objects.get(id=profile_id)
         profile.validity = 'payment pending'
-        profile.save()
+        profile.save()  # This will trigger the save method in the model, which sets status to False
     except ShopAdminProfile.DoesNotExist:
-        pass  # Handle the case where the profile might have been deleted
+        pass
+
 
 
 @login_required
@@ -171,7 +193,7 @@ def create_shop_admin(request):
                 shop_admin_profile.validity = 'running'  # Set status to running
                 shop_admin_profile.save()
                 
-                # Start a thread to change the validity status after one minute
+                # Start a thread to change the validity status after 10 minutes
                 threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile.id,)).start()
                 
                 messages.success(request, 'New Shop Admin created successfully!')
@@ -183,8 +205,46 @@ def create_shop_admin(request):
 
     return render(request, 'app1/create_shop_admin.html', {'form': form})
 
+# import time
+# def change_validity_after_ten_seconds(profile_id):
+#     time.sleep(10)  # Wait for 10 seconds
+#     try:
+#         profile = ShopAdminProfile.objects.get(id=profile_id)
+#         profile.validity = 'payment pending'
+#         profile.save()  # This will trigger the save method in the model, which sets status to False
+#     except ShopAdminProfile.DoesNotExist:
+#         pass
 
+# @login_required
+# def create_shop_admin(request):
+#     if not request.user.is_superuser:
+#         return HttpResponseForbidden("You don't have permission to access this page.")
 
+#     if request.method == 'POST':
+#         form = ShopAdminCreationForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             if User.objects.filter(username=username).exists():
+#                 messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
+#                 return render(request, 'app1/create_shop_admin.html', {'form': form})
+
+#             try:
+#                 shop_admin_profile = form.save(commit=False)
+#                 shop_admin_profile.status = True
+#                 shop_admin_profile.validity = 'running'  # Set status to running
+#                 shop_admin_profile.save()
+
+#                 # Start a thread to change the validity status after 10 seconds
+#                 threading.Thread(target=change_validity_after_ten_seconds, args=(shop_admin_profile.id,)).start()
+
+#                 messages.success(request, 'New Shop Admin created successfully!')
+#                 return redirect('superuser_dashboard')
+#             except Exception as e:
+#                 messages.error(request, f'An error occurred while creating the shop admin: {str(e)}')
+#     else:
+#         form = ShopAdminCreationForm()
+
+#     return render(request, 'app1/create_shop_admin.html', {'form': form})
 
 
 @login_required
@@ -236,8 +296,14 @@ def toggle_status(request, profile_id):
     
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
     profile.status = not profile.status
+    
+    if profile.status and profile.validity != 'payment pending':
+        profile.validity = 'running'
+        # Start a thread to change the validity status after one minute
+        threading.Thread(target=change_validity_after_one_minute, args=(profile.id,)).start()
+    
     profile.save()
-    status_text = "disabled" if profile.status else "enabled"
+    status_text = "enabled" if profile.status else "disabled"
     messages.success(request, f'Shop admin account has been {status_text}.')
     return redirect('superuser_dashboard')
     
@@ -460,15 +526,7 @@ def download_qr_code(request):
 
 
 
-def change_validity_after_one_minute(profile_id):
-    import time
-    time.sleep(60)  # Wait for 1 minute
-    try:
-        profile = ShopAdminProfile.objects.get(id=profile_id)
-        profile.validity = 'payment pending'  # Change status to payment pending
-        profile.save()
-    except ShopAdminProfile.DoesNotExist:
-        pass  # Handle the case where the profile might have been deleted
+
 
 
 
