@@ -11,6 +11,6 @@ services:
       - key: PORT
         value: "8000"  # This will be set automatically by Render
     databases:
-      - name: super_xphb  # adjust this to match your actual database name
+      - name: super_market_6301  # adjust this to match your actual database name
     autoDeploy: true
     healthCheckPath: "/"
