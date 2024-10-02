@@ -134,16 +134,17 @@
 <body>
     <header>
         <div class="header-content row justify-content-center align-items-center py-4">
-            <div class="col-4 text-center">
+            <div class="col-12 col-md-4 text-center">
                 {% if shop_admin.logo %}
                     <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px;">
-                    <h4><pree style="white-space: nowrap; margin-right: 3%;">{{ shop_admin.shop_name|capfirst|upper }}</pree></h4>
+                    <h4 class="text-nowrap">{{ shop_admin.shop_name|capfirst|upper }}</h4>
                     <p class="mb-0" style="font-size: 1rem; letter-spacing: 0.5px; white-space: nowrap;">
                         {{ shop_admin.location|capfirst }}
                     </p>
                 {% endif %}
             </div>
         </div>
+        
     </header>
     
 

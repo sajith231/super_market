@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required         
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.utils import timezone
@@ -21,6 +21,7 @@ from .models import ShopAdminProfile
 import os
 from django.db import IntegrityError
 from django.contrib.auth.models import User
+import time
 
 
 def login_view(request):
@@ -109,7 +110,7 @@ def generate_qr_code_async(request, shop_admin_id):
     from django.conf import settings
 
     shop_admin = ShopAdminProfile.objects.get(id=shop_admin_id)     #34567876545678765678765678765
-    index_url = f"http://YOUR_IP_ADDRESS:8000{reverse('index_with_uid', kwargs={'uid': shop_admin.uid})}"
+    
     if not shop_admin.uid:
         shop_admin.uid = get_random_string(length=20)
         shop_admin.save()
@@ -164,9 +165,50 @@ def superuser_dashboard(request):
 
 
 
-import time
-def change_validity_after_ten_minutes(profile_id):
-    time.sleep(600)  # Wait for 10 minutes (600 seconds)
+# def change_validity_after_one_minute(profile_id):
+#     time.sleep(60)  # Wait for 1 minute (60 seconds)
+#     try:
+#         profile = ShopAdminProfile.objects.get(id=profile_id)
+#         profile.validity = 'payment pending'
+#         profile.save()  # This will trigger the save method in the model, which sets status to False
+#     except ShopAdminProfile.DoesNotExist:
+#         pass
+
+# @login_required
+# def create_shop_admin(request):
+#     if not request.user.is_superuser:
+#         return HttpResponseForbidden("You don't have permission to access this page.")
+
+#     if request.method == 'POST':
+#         form = ShopAdminCreationForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             if User.objects.filter(username=username).exists():
+#                 messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
+#                 return render(request, 'app1/create_shop_admin.html', {'form': form})
+
+#             try:
+#                 shop_admin_profile = form.save(commit=False)
+#                 shop_admin_profile.status = True
+#                 shop_admin_profile.validity = 'running'  # Set validity to running
+#                 shop_admin_profile.save()
+
+#                 # Start a thread to change the validity status after 1 minute
+#                 threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile.id,)).start()
+
+#                 messages.success(request, 'New Shop Admin created successfully!')
+#                 return redirect('superuser_dashboard')
+#             except Exception as e:
+#                 messages.error(request, f'An error occurred while creating the shop admin: {str(e)}')
+#     else:
+#         form = ShopAdminCreationForm()
+
+#     return render(request, 'app1/create_shop_admin.html', {'form': form})
+
+
+def change_validity_after_365_days(profile_id):
+    
+    time.sleep(365 * 24 * 60 * 60)  
     try:
         profile = ShopAdminProfile.objects.get(id=profile_id)
         profile.validity = 'payment pending'
@@ -193,8 +235,8 @@ def create_shop_admin(request):
                 shop_admin_profile.validity = 'running'  # Set validity to running
                 shop_admin_profile.save()
 
-                # Start a thread to change the validity status after 10 minutes
-                threading.Thread(target=change_validity_after_ten_minutes, args=(shop_admin_profile.id,)).start()
+                # Start a thread to change the validity status after 365 days
+                threading.Thread(target=change_validity_after_365_days, args=(shop_admin_profile.id,)).start()
 
                 messages.success(request, 'New Shop Admin created successfully!')
                 return redirect('superuser_dashboard')
@@ -204,6 +246,7 @@ def create_shop_admin(request):
         form = ShopAdminCreationForm()
 
     return render(request, 'app1/create_shop_admin.html', {'form': form})
+
 
 
 @login_required
@@ -259,7 +302,7 @@ def toggle_status(request, profile_id):
     if profile.status and profile.validity != 'payment pending':
         profile.validity = 'running'
         # Start a thread to change the validity status after one minute
-        threading.Thread(target=change_validity_after_ten_minutes, args=(profile.id,)).start()
+        threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
     
     profile.save()
     status_text = "enabled" if profile.status else "disabled"
@@ -288,7 +331,7 @@ def toggle_status(request, profile_id):
     if profile.status:  # If the profile is being enabled
         profile.validity = 'running'
         # Start a thread to change the validity status after one minute
-        threading.Thread(target=change_validity_after_ten_minutes, args=(profile.id,)).start()
+        threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
     
     profile.save()
     status_text = "enabled" if profile.status else "disabled"
