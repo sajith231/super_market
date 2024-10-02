@@ -31,7 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'super-market-2-ku2i.onrender.com',
-    'super-market-3.onrender.com',  # Add this line
+    'super-market-3.onrender.com',
+    'super-market-ctze.onrender.com',  # Add this line
     'localhost',
     '127.0.0.1'
 ]
