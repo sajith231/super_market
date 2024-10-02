@@ -64,13 +64,14 @@ class ShopAdminProfileForm(forms.ModelForm):
 
     class Meta:
         model = ShopAdminProfile
-        fields = ['shop_name', 'address', 'location', 'phone_number', 'amount', 'responsible_person', 'username', 'password']
+        fields = ['shop_name','location', 'address',  'phone_number', 'amount', 'responsible_person', 'username', 'password']
         widgets = {
             'shop_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'location': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control'}),
-            'location': forms.TextInput(attrs={'class': 'form-control'}),
+            
             'responsible_person': forms.TextInput(attrs={'class': 'form-control'}),
         }
 

@@ -162,8 +162,10 @@ def superuser_dashboard(request):
 
 
 
-def change_validity_after_one_minute(profile_id):
-    import time
+
+
+import time
+def change_validity_after_ten_minutes(profile_id):
     time.sleep(600)  # Wait for 10 minutes (600 seconds)
     try:
         profile = ShopAdminProfile.objects.get(id=profile_id)
@@ -171,8 +173,6 @@ def change_validity_after_one_minute(profile_id):
         profile.save()  # This will trigger the save method in the model, which sets status to False
     except ShopAdminProfile.DoesNotExist:
         pass
-
-
 
 @login_required
 def create_shop_admin(request):
@@ -186,16 +186,16 @@ def create_shop_admin(request):
             if User.objects.filter(username=username).exists():
                 messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
                 return render(request, 'app1/create_shop_admin.html', {'form': form})
-            
+
             try:
                 shop_admin_profile = form.save(commit=False)
                 shop_admin_profile.status = True
-                shop_admin_profile.validity = 'running'  # Set status to running
+                shop_admin_profile.validity = 'running'  # Set validity to running
                 shop_admin_profile.save()
-                
+
                 # Start a thread to change the validity status after 10 minutes
-                threading.Thread(target=change_validity_after_one_minute, args=(shop_admin_profile.id,)).start()
-                
+                threading.Thread(target=change_validity_after_ten_minutes, args=(shop_admin_profile.id,)).start()
+
                 messages.success(request, 'New Shop Admin created successfully!')
                 return redirect('superuser_dashboard')
             except Exception as e:
@@ -204,47 +204,6 @@ def create_shop_admin(request):
         form = ShopAdminCreationForm()
 
     return render(request, 'app1/create_shop_admin.html', {'form': form})
-
-# import time
-# def change_validity_after_ten_seconds(profile_id):
-#     time.sleep(10)  # Wait for 10 seconds
-#     try:
-#         profile = ShopAdminProfile.objects.get(id=profile_id)
-#         profile.validity = 'payment pending'
-#         profile.save()  # This will trigger the save method in the model, which sets status to False
-#     except ShopAdminProfile.DoesNotExist:
-#         pass
-
-# @login_required
-# def create_shop_admin(request):
-#     if not request.user.is_superuser:
-#         return HttpResponseForbidden("You don't have permission to access this page.")
-
-#     if request.method == 'POST':
-#         form = ShopAdminCreationForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             if User.objects.filter(username=username).exists():
-#                 messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
-#                 return render(request, 'app1/create_shop_admin.html', {'form': form})
-
-#             try:
-#                 shop_admin_profile = form.save(commit=False)
-#                 shop_admin_profile.status = True
-#                 shop_admin_profile.validity = 'running'  # Set status to running
-#                 shop_admin_profile.save()
-
-#                 # Start a thread to change the validity status after 10 seconds
-#                 threading.Thread(target=change_validity_after_ten_seconds, args=(shop_admin_profile.id,)).start()
-
-#                 messages.success(request, 'New Shop Admin created successfully!')
-#                 return redirect('superuser_dashboard')
-#             except Exception as e:
-#                 messages.error(request, f'An error occurred while creating the shop admin: {str(e)}')
-#     else:
-#         form = ShopAdminCreationForm()
-
-#     return render(request, 'app1/create_shop_admin.html', {'form': form})
 
 
 @login_required
@@ -300,7 +259,7 @@ def toggle_status(request, profile_id):
     if profile.status and profile.validity != 'payment pending':
         profile.validity = 'running'
         # Start a thread to change the validity status after one minute
-        threading.Thread(target=change_validity_after_one_minute, args=(profile.id,)).start()
+        threading.Thread(target=change_validity_after_ten_minutes, args=(profile.id,)).start()
     
     profile.save()
     status_text = "enabled" if profile.status else "disabled"
@@ -329,7 +288,7 @@ def toggle_status(request, profile_id):
     if profile.status:  # If the profile is being enabled
         profile.validity = 'running'
         # Start a thread to change the validity status after one minute
-        threading.Thread(target=change_validity_after_one_minute, args=(profile.id,)).start()
+        threading.Thread(target=change_validity_after_ten_minutes, args=(profile.id,)).start()
     
     profile.save()
     status_text = "enabled" if profile.status else "disabled"
