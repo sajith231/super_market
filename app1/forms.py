@@ -93,11 +93,11 @@ class ShopAdminCreationForm(forms.ModelForm):
     phone_number = forms.CharField(max_length=15, required=True)
     location = forms.CharField(max_length=100, required=True)  # New Location field
     amount = forms.DecimalField(max_digits=10, decimal_places=2, required=True)  # New Amount field
-    responsible_person=forms.CharField(max_length=255, required=True)
+    responsible_person = forms.CharField(max_length=255, required=True)
 
     class Meta:
         model = ShopAdminProfile
-        fields = ['shop_name', 'address', 'location', 'phone_number','responsible_person', 'amount']  # Updated fields list
+        fields = ['username', 'password', 'shop_name', 'address', 'location', 'phone_number', 'responsible_person', 'amount']  # Added username and password
 
     def save(self, commit=True):
         username = self.cleaned_data['username']

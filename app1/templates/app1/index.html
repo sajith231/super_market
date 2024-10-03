@@ -129,6 +129,18 @@
         .carousel-indicators .active {
             background-color: #22c55e; /* Active dot color */
         }
+
+        /* Zoom Styles */
+        .zoomed {
+            transform: scale(2);
+            transition: transform 0.5s ease;
+            cursor: zoom-out;
+        }
+
+        /* Ensure container doesn't overflow when zoomed */
+        .modal-body {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -195,7 +207,7 @@
                             <div class="carousel-inner">
                                 {% for image in images %}
                                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="height: calc(100vh - 150px); object-fit: contain;">
+                                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100 zoomable" style="height: calc(100vh - 150px); object-fit: contain;">
                                     </div>
                                 {% endfor %}
                             </div>
@@ -218,7 +230,7 @@
         <div class="footer-content">
             <div class="contact-item">
                 <i class="fa-solid fa-phone"></i>
-                <span class="contact-text" style="margin-left: 1%;">{{ shop_admin.phone_number }}</span>
+                <span class="contact-text" style="margin-left: 1%;"><a href="{{ shop_admin.phone_number }}">:+{{ shop_admin.phone_number }}</a></span>
             </div>
             
             <div class="contact-item">
@@ -231,20 +243,39 @@
             <p >
                 Developed and designed by <span style="color: #22c55e;">IMC Business Solutions</span> | 
                 <i class="fa-solid fa-phone" ></i>
-                : 9061947005
+                <a href="tel:+917593820007">:+91 7593820007</a>
             </p>
         </div>
     </footer>
-    
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     <script>
+        let lastTap = 0;
+        const zoomableImages = document.querySelectorAll('.zoomable');
+
+        zoomableImages.forEach(image => {
+            image.addEventListener('touchend', function(event) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    this.classList.toggle('zoomed');
+                }
+                lastTap = currentTime;
+            });
+        });
+
+        // For desktop (mouse double-click)
+        zoomableImages.forEach(image => {
+            image.addEventListener('dblclick', function() {
+                this.classList.toggle('zoomed');
+            });
+        });
+
         function openModal(index) {
-            $('#modalCarousel').carousel(index);
             $('#imageModal').modal('show');
+            $('#modalCarousel').carousel(index);
         }
     </script>
 </body>
