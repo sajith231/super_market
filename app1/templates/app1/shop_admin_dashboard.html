@@ -10,18 +10,20 @@
         {% if shop_admin.logo %}
         <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" class="img-fluid mb-2" style="max-height: 100px; object-fit: contain;">
         {% endif %}
-        <form method="post" enctype="multipart/form-data" class="d-flex align-items-center gap-3">
-            {% csrf_token %}
-            <div class="input-group" style="max-width: 250px;">
-                <input type="file" name="shop_logo" accept="image/*" class="form-control" id="shopLogoInput" style="border-radius: 5px; padding: 10px; margin-right: 10%;">
-                <div class="input-group-append">
-                    <button type="submit" name="upload_logo" class="btn btn-primary" style="border-radius: 5px;">Upload Logo</button>
+        <div style="display: flex;justify-content: end;justify-items: end;width: 100%;padding-top: 10px;">
+            <form method="post" enctype="multipart/form-data" class="d-flex align-items-center gap-3" style="display: flex;justify-content: end;">
+                {% csrf_token %}
+                <div class="input-group" style="max-width: 250px;">
+                    <input type="file" name="shop_logo" accept="image/*" class="form-control" id="shopLogoInput" style="border-radius: 5px; padding: 10px; margin-right: 10%;">
+                    <div class="input-group-append">
+                        <button type="submit" name="upload_logo" class="btn btn-primary" style="border-radius: 5px;">Upload Logo</button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Logout Button -->
-            <a href="{% url 'shop_admin_logout' %}" class="btn btn-danger">Logout</a>
-        </form>
+                
+                <!-- Logout Button -->
+                <a href="{% url 'shop_admin_logout' %}" class="btn btn-danger">Logout</a>
+            </form>
+        </div>
     </div>
     <h1 class="mb-2">Welcome, <span style="color: green;">{{ shop_admin.user.username }}!</span></h1>
 </div>
