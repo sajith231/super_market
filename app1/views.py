@@ -217,7 +217,7 @@ def change_validity_after_365_days(profile_id):
         pass
 
 @login_required
-# def create_shop_admin(request): jdshj
+def create_shop_admin(request): 
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
 
