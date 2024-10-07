@@ -22,7 +22,7 @@ import os
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 import time
-
+from urllib.parse import urljoin
 
 def login_view(request):
     if request.method == 'POST':
@@ -57,48 +57,23 @@ def login_view(request):
 @login_required
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
-
-    if not shop_admin.status:
-        logout(request)
-        messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
-        return redirect('shop_admin_login')
-
-    if shop_admin.validity == 'payment pending':
-        messages.warning(request, 'Your payment is pending. Some features may be limited.')
-        can_edit = False  # Disable editing when payment is pending
-    else:
-        can_edit = True  # Allow editing otherwise
-
-    images = shop_admin.uploaded_images.all()
-    form = ImageUploadForm()
-
-    if request.method == 'POST':
-        if 'upload_logo' in request.POST:
-            if request.FILES.get('shop_logo'):
-                shop_admin.logo = request.FILES['shop_logo']
-                shop_admin.save()
-                messages.success(request, 'Shop logo uploaded successfully!')
-        elif 'generate_qr' in request.POST:
-            threading.Thread(target=generate_qr_code_async, args=(request, shop_admin.id)).start()
-            messages.success(request, 'QR Code generation started. It will be available soon.')
-        else:
-            form = ImageUploadForm(request.POST, request.FILES)
-            if form.is_valid():
-                new_image = form.save(commit=False)
-                new_image.shop_admin_profile = shop_admin
-                new_image.display_order = images.count() + 1
-                new_image.save()
-                messages.success(request, 'Image uploaded successfully!')
-                return redirect('shop_admin_dashboard')
-
+    
+    # Generate the production URL for display
+    protocol = 'https://' if settings.PRODUCTION_SERVER.get('USE_HTTPS') else 'http://'
+    server_ip = settings.PRODUCTION_SERVER.get('IP')
+    server_port = settings.PRODUCTION_SERVER.get('PORT')
+    base_url = f"{protocol}{server_ip}:{server_port}"
+    index_path = reverse('index_with_uid', kwargs={'uid': shop_admin.uid})
+    production_url = urljoin(base_url, index_path)
+    
     context = {
-        'form': form,
-        'images': images,
+        'form': ImageUploadForm(),
+        'images': shop_admin.uploaded_images.all(),
         'shop_admin': shop_admin,
-        'qr_code_url': request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid})),
-        'can_edit': can_edit,  # Pass edit permission to template
+        'qr_code_url': production_url,
+        'can_edit': shop_admin.validity != 'payment pending',
     }
-
+    
     return render(request, 'app1/shop_admin_dashboard.html', context)
 
 
@@ -412,29 +387,46 @@ def delete_shop_admin(request, profile_id):
 def generate_qr_code(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
     
+    # Generate or get the UID
     if not shop_admin.uid:
         shop_admin.uid = get_random_string(length=20)
         shop_admin.save()
     
-    # Genarate ip address here
-    index_url = f'http://13.233.145.51:8000/index/{shop_admin.uid}/'
+    # Construct the production URL
+    protocol = 'https://' if settings.PRODUCTION_SERVER.get('USE_HTTPS') else 'http://'
+    server_ip = settings.PRODUCTION_SERVER.get('IP')
+    server_port = settings.PRODUCTION_SERVER.get('PORT')
     
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(index_url)
+    # Build the complete URL with the production server IP
+    base_url = f"{protocol}{server_ip}:{server_port}"
+    index_path = reverse('index_with_uid', kwargs={'uid': shop_admin.uid})
+    production_url = urljoin(base_url, index_path)
+    
+    # Create QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(production_url)
     qr.make(fit=True)
     
+    # Create the QR code image
     img = qr.make_image(fill_color="black", back_color="white")
     
+    # Save the QR code image
     qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')
     os.makedirs(qr_code_dir, exist_ok=True)
     file_name = f'qr_code_{shop_admin.uid}.png'
     file_path = os.path.join(qr_code_dir, file_name)
     img.save(file_path)
     
+    # Update shop admin profile with QR code path
     shop_admin.qr_code = os.path.join('qr_codes', file_name)
     shop_admin.save()
     
-    messages.success(request, 'QR Code generated successfully!')
+    messages.success(request, f'QR Code generated successfully! URL: {production_url}')
     return redirect('shop_admin_dashboard')
 
 
