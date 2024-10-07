@@ -413,12 +413,15 @@ def generate_qr_code(request):
         shop_admin.uid = get_random_string(length=20)
         shop_admin.save()
     
-    # Use the settings to get the production server details
-    protocol = 'https' if settings.PRODUCTION_SERVER.get('USE_HTTPS', False) else 'http'
-    domain = settings.PRODUCTION_SERVER.get('DOMAIN', request.get_host())
+    # Construct the production URL
+    protocol = 'https://' if settings.PRODUCTION_SERVER.get('USE_HTTPS') else 'http://'
+    server_ip = settings.PRODUCTION_SERVER.get('IP')
+    server_port = settings.PRODUCTION_SERVER.get('PORT')
     
-    # Construct the URL using the production domain and the reverse function
-    production_url = f'{protocol}://{domain}{reverse("index_with_uid", kwargs={"uid": shop_admin.uid})}'
+    # Build the complete URL with the production server IP
+    base_url = f"{protocol}{server_ip}:{server_port}"
+    index_path = reverse('index_with_uid', kwargs={'uid': shop_admin.uid})
+    production_url = urljoin(base_url, index_path)
     
     # Create QR code
     qr = qrcode.QRCode(

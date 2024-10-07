@@ -148,15 +148,14 @@
     <header>
         <div class="header-content row justify-content-center align-items-center py-4">
             <div class="col-12 col-md-4 text-center">
-                {% if shop_admin %}
-                    <!-- Debugging output -->
+                {% if shop_admin.logo %}
+                <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" class="img-fluid mb-2" style="max-height: 100px; object-fit: contain;">
+                <p>{{ shop_admin.logo.url }}</p> <!-- For debugging purposes -->
+                {% else %}
+                <p>No Logo Available</p>
+                {% endif %}
+
                     
-                    <!-- Check if shop_admin has a logo -->
-                    {% if shop_admin.logo %}
-                        <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px;">
-                    {% else %}
-                        <p>No Logo Available</p>
-                    {% endif %}
                     <!-- Shop name and location -->
                     <h4>{{ shop_admin.shop_name }}</h4>
                     <p>{{ shop_admin.location }}</p>
