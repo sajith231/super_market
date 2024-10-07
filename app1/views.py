@@ -416,7 +416,7 @@ def generate_qr_code(request):
         shop_admin.uid = get_random_string(length=20)
         shop_admin.save()
     
-    # Generate the URL using the IP address
+    # Genarate ip address here
     index_url = f'http://13.233.145.51:8000/index/{shop_admin.uid}/'
     
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
