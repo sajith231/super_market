@@ -148,22 +148,31 @@
     <header>
         <div class="header-content row justify-content-center align-items-center py-4">
             <div class="col-12 col-md-4 text-center">
-                {% if shop_admin.logo %}
-                    <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px;">
-                    <h4 class="text-nowrap">{{ shop_admin.shop_name|capfirst|upper }}</h4>
-                    <p class="mb-0" style="font-size: 1rem; letter-spacing: 0.5px; white-space: nowrap;">
-                        {{ shop_admin.location|capfirst }}
-                    </p>
+                {% if shop_admin %}
+                    <!-- Debugging output -->
+                    
+                    <!-- Check if shop_admin has a logo -->
+                    {% if shop_admin.logo %}
+                        <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" style="max-width: 100px; max-height: 100px;">
+                    {% else %}
+                        <p>No Logo Available</p>
+                    {% endif %}
+                    <!-- Shop name and location -->
+                    <h4>{{ shop_admin.shop_name }}</h4>
+                    <p>{{ shop_admin.location }}</p>
+                {% else %}
+                    <p>No Shop Admin Data Available</p>
                 {% endif %}
             </div>
         </div>
-        
     </header>
+    
+    
     
 
     <main class="main-content">
         <div id="imageCarousel" class="carousel slide" data-ride="carousel">
-            <h2 >Hot Deals</h2> <!-- Center the title -->
+            <h2 style="text-align: center;">Hot Deals</h2> <!-- Center the title -->
             <div class="carousel-inner">
                 {% for image in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">

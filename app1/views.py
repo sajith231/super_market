@@ -58,6 +58,26 @@ def login_view(request):
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
     
+    if request.method == 'POST':
+        if 'upload_logo' in request.POST:
+            if request.FILES.get('shop_logo'):
+                shop_admin.logo = request.FILES['shop_logo']
+                shop_admin.save()
+                messages.success(request, 'Shop logo uploaded successfully!')
+        elif 'upload_image' in request.POST:
+            form = ImageUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                new_image = form.save(commit=False)
+                new_image.shop_admin_profile = shop_admin
+                new_image.display_order = UploadedImage.objects.filter(shop_admin_profile=shop_admin).count() + 1
+                new_image.save()
+                messages.success(request, 'Image uploaded successfully!')
+            else:
+                messages.error(request, 'Error uploading image. Please check the file format and try again.')
+                print("Form errors:", form.errors)  # Debugging print for form errors
+        elif 'generate_qr' in request.POST:
+            return generate_qr_code(request)
+    
     # Generate the production URL for display
     protocol = 'https://' if settings.PRODUCTION_SERVER.get('USE_HTTPS') else 'http://'
     server_ip = settings.PRODUCTION_SERVER.get('IP')
@@ -75,6 +95,7 @@ def shop_admin_dashboard(request):
     }
     
     return render(request, 'app1/shop_admin_dashboard.html', context)
+
 
 
 def generate_qr_code_async(request, shop_admin_id):
@@ -392,15 +413,12 @@ def generate_qr_code(request):
         shop_admin.uid = get_random_string(length=20)
         shop_admin.save()
     
-    # Construct the production URL
-    protocol = 'https://' if settings.PRODUCTION_SERVER.get('USE_HTTPS') else 'http://'
-    server_ip = settings.PRODUCTION_SERVER.get('IP')
-    server_port = settings.PRODUCTION_SERVER.get('PORT')
+    # Use the settings to get the production server details
+    protocol = 'https' if settings.PRODUCTION_SERVER.get('USE_HTTPS', False) else 'http'
+    domain = settings.PRODUCTION_SERVER.get('DOMAIN', request.get_host())
     
-    # Build the complete URL with the production server IP
-    base_url = f"{protocol}{server_ip}:{server_port}"
-    index_path = reverse('index_with_uid', kwargs={'uid': shop_admin.uid})
-    production_url = urljoin(base_url, index_path)
+    # Construct the URL using the production domain and the reverse function
+    production_url = f'{protocol}://{domain}{reverse("index_with_uid", kwargs={"uid": shop_admin.uid})}'
     
     # Create QR code
     qr = qrcode.QRCode(
