@@ -72,7 +72,7 @@
         .footer {
             background-color: white;
             padding: 20px;
-            margin-top: auto;
+            margin-top: 20px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
         .footer-content {
@@ -149,27 +149,23 @@
         <div class="header-content row justify-content-center align-items-center py-4">
             <div class="col-12 col-md-4 text-center">
                 {% if shop_admin %}
-    <!-- Display the shop logo if available -->
-    {% if shop_admin.logo %}
-        <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" class="img-fluid mb-2" style="height: 70px; object-fit: contain;">
-        <!-- <p>{{ shop_admin.logo.url }}</p> For debugging purposes -->
-    {% else %}
-        <p>No Logo Available</p>
-    {% endif %}
+                    <!-- Display the shop logo if available -->
+                    {% if shop_admin.logo %}
+                        <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" class="img-fluid mb-2" style="height: 70px; object-fit: contain;">
+                    {% else %}
+                        <p>No Logo Available</p>
+                    {% endif %}
     
-    <!-- Shop name and location -->
-    <h4>{{ shop_admin.shop_name }}</h4>
-    <p>{{ shop_admin.location }}</p>
-{% else %}
-    <p>No Shop Admin Data Available</p>
-{% endif %}
+                    <!-- Shop name and location -->
+                    <h4>{{ shop_admin.shop_name }}</h4>
+                    <p>{{ shop_admin.location }}</p>
+                {% else %}
+                    <p>No Shop Admin Data Available</p>
+                {% endif %}
             </div>
         </div>
     </header>
     
-    
-    
-
     <main class="main-content">
         <div id="imageCarousel" class="carousel slide" data-ride="carousel">
             <h2 style="text-align: center;">Hot Deals</h2> <!-- Center the title -->
@@ -257,36 +253,20 @@
             </p>
         </div>
     </footer>
-
+  
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
-        let lastTap = 0;
-        const zoomableImages = document.querySelectorAll('.zoomable');
-
-        zoomableImages.forEach(image => {
-            image.addEventListener('touchend', function(event) {
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
-                if (tapLength < 500 && tapLength > 0) {
-                    this.classList.toggle('zoomed');
-                }
-                lastTap = currentTime;
-            });
-        });
-
-        // For desktop (mouse double-click)
-        zoomableImages.forEach(image => {
-            image.addEventListener('dblclick', function() {
-                this.classList.toggle('zoomed');
-            });
-        });
-
         function openModal(index) {
             $('#imageModal').modal('show');
             $('#modalCarousel').carousel(index);
         }
+        
+        $('.zoomable').on('click', function() {
+            $(this).toggleClass('zoomed');
+        });
     </script>
 </body>
 </html>
