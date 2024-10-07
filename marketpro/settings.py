@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-b5#1q6r01z9b2@^!3oyksd#+qw2nr9fn_98p+n3h@51r_4t1m_
 DEBUG = True
 
 # ALLOWED_HOSTS = ['super-market-h0gf.onrender.com','localhost']
-ALLOWED_HOSTS = ['super-market-h0gf.onrender.com','localhost','127.0.0.1','192.168.x.x','192.168.1.16']
+ALLOWED_HOSTS = ['super-market-h0gf.onrender.com','localhost','127.0.0.1','192.168.x.x','192.168.1.16','13.233.145.51']
 
 
 
