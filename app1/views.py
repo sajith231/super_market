@@ -412,30 +412,25 @@ def delete_shop_admin(request, profile_id):
 def generate_qr_code(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
     
-    # Generate a unique identifier for the shop admin if it doesn't exist
     if not shop_admin.uid:
         shop_admin.uid = get_random_string(length=20)
         shop_admin.save()
     
-    # Generate the URL for the shop admin's index page, including the UID
-    index_url = request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid}))
+    # Generate the URL using the IP address
+    index_url = f'https://13.233.145.51/index/{shop_admin.uid}/'
     
-    # Create QR code instance
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(index_url)
     qr.make(fit=True)
     
-    # Create an image from the QR Code
     img = qr.make_image(fill_color="black", back_color="white")
     
-    # Save the image
     qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')
     os.makedirs(qr_code_dir, exist_ok=True)
     file_name = f'qr_code_{shop_admin.uid}.png'
     file_path = os.path.join(qr_code_dir, file_name)
     img.save(file_path)
     
-    # Save the QR code URL to the ShopAdminProfile
     shop_admin.qr_code = os.path.join('qr_codes', file_name)
     shop_admin.save()
     
