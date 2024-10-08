@@ -158,8 +158,8 @@
                     {% endif %}
     
                     <!-- Shop name and location -->
-                    <h4>{{ shop_admin.shop_name }}</h4>
-                    <p>{{ shop_admin.location }}</p>
+                    <h4>{{ shop_admin.shop_name|upper }}</h4>
+                    <p>{{ shop_admin.location|upper }}</p>
                 {% else %}
                     <p>No Shop Admin Data Available</p>
                 {% endif %}
@@ -233,24 +233,26 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="contact-item">
+    <footer class="footer" style="display: flex;justify-content: center; align-items: center;margin: auto;flex-direction: column;width: 100%;">
+        <div class="footer-content" style="display: flex;justify-content: center; align-items: center;margin: auto;flex-direction: column;">
+            <div class="contact-item" style="display: flex; justify-content: center; gap: 5px;width: 100%;">
                 <i class="fa-solid fa-phone"></i>
-                <span class="contact-text" style="margin-left: 1%;"><a href="{{ shop_admin.phone_number }}">:+91 {{ shop_admin.phone_number }}</a></span>
+                <span class="contact-text" style="margin-left: 1%;"><a href="{{ shop_admin.phone_number }}">+91 {{ shop_admin.phone_number }}</a></span>
             </div>
             
-            <div class="contact-item">
-                <i class="fa-solid fa-location-dot"></i>
-                <span class="contact-text"style="margin-left: 1%;">{{ shop_admin.address }}</span>
+            <div class="contact-item" style="display: flex; justify-content: center;align-items: start;width: 100%;text-align: center;margin-top: -10px;">
+                <div style="display: flex;justify-content: center;margin: auto;width: 100%;gap: 5px;">
+                    
+                    <span class="contact-text"><i class="fa-solid fa-location-dot" style="padding-right: 5px;"></i>{{ shop_admin.address }}</span>
+                </div>
             </div>
         </div>
     
-        <div class="footer-bottom"  style="display: flex;justify-content: center;align-items: center;margin: auto;">
-            <p >
-                Developed and designed by <span style="color: #22c55e;">IMC Business Solutions</span> | 
+        <div class="footer-bottom"  style="display: flex;justify-content:center;align-items: center;margin-top: -5px;">
+            <p style="display: flex;justify-content: center;align-items: center;text-align: center;flex-direction: column;">
+                Developed and Designed by <span style="color: #22c55e; display: block;font-weight: 600;">IMC Business Solutions:  
                 <i class="fa-solid fa-phone" ></i>
-                <a href="tel:+917593820007">:+91 7593820007</a>
+                <a href="tel:+917593820007">+91 7593820007</a></span>
             </p>
         </div>
     </footer>
