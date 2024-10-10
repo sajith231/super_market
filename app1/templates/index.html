@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ shop_admin.shop_name }}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
@@ -125,6 +128,7 @@
             border-radius: 50%; /* Make them circular */
             width: 12px; /* Size of the dots */
             height: 12px; /* Size of the dots */
+           
         }
 
         .carousel-indicators .active {
@@ -146,30 +150,28 @@
     </style>
 </head>
 <body>
-    <header style="height: 170px;">
+    <div style="height: 115px;">
         <div class="header-content row justify-content-center align-items-center py-4">
             <div class="col-12 col-md-4 text-center">
                 {% if shop_admin %}
-                    <!-- Display the shop logo if available -->
                     {% if shop_admin.logo %}
-                        <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" class="img-fluid mb-2" style="height: 70px; object-fit: contain;">
+                        <img src="{{ shop_admin.logo.url }}" alt="Shop Logo" class="img-fluid mb-2" style="height: 80px; object-fit: contain;">
                     {% else %}
                         <p>No Logo Available</p>
                     {% endif %}
-    
-                    <!-- Shop name and location -->
-                    <h4>{{ shop_admin.shop_name|upper }}</h4>
-                    <p>{{ shop_admin.location|upper }}</p>
                 {% else %}
                     <p>No Shop Admin Data Available</p>
                 {% endif %}
             </div>
         </div>
-    </header>
+    </div>
+    
     
     <main class="main-content">
+        <div style="width: 100%;height: 60px;margin-bottom: 10px;">
+            <img src="{% static 'images/offer.png' %}" style="width: 100%;height: 100%;object-fit: contain;" alt="">
+        </div>
         <div id="imageCarousel" class="carousel slide" data-ride="carousel">
-            <h2 style="text-align: center;">Hot Deals</h2> <!-- Center the title -->
             <div class="carousel-inner">
                 {% for image in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
@@ -194,8 +196,8 @@
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="sr-only">Previous</span>
             </a>
-            <a class="carousel-control-next" href="#imageCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <a class="carousel-control-next" href="#imageCarousel" role="button" data-slide="next" >
+                <span class="carousel-control-next-icon"  aria-hidden="true"></span>
                 <span class="sr-only">Next</span>
             </a>
         </div>
@@ -218,11 +220,11 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <a class="carousel-control-prev" href="#modalCarousel" role="button" data-slide="prev">
+                            <a class="carousel-control-prev" href="#modalCarousel" role="button" data-slide="prev" >
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="sr-only">Previous</span>
                             </a>
-                            <a class="carousel-control-next" href="#modalCarousel" role="button" data-slide="next">
+                            <a class="carousel-control-next" href="#modalCarousel" role="button" data-slide="next" >
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="sr-only">Next</span>
                             </a>
@@ -232,30 +234,51 @@
             </div>
         </div>
     </main>
-
-    <footer class="footer" style="display: flex;justify-content: center; align-items: center;margin: auto;flex-direction: column;width: 100%;">
-        <div class="footer-content" style="display: flex;justify-content: center; align-items: center;margin: auto;flex-direction: column;">
-            <div class="contact-item" style="display: flex; justify-content: center; gap: 5px;width: 100%;">
-                <i class="fa-solid fa-phone"></i>
-                <span class="contact-text" style="margin-left: 1%;"><a href="tel:{{ shop_admin.phone_number }}">+91 {{ shop_admin.phone_number }}</a></span>
-            </div>
-            
-            <div class="contact-item" style="display: flex; justify-content: center;align-items: start;width: 100%;text-align: center;margin-top: -10px;">
-                <div style="display: flex;justify-content: center;margin: auto;width: 100%;gap: 5px;">
-                    
-                    <span class="contact-text"><i class="fa-solid fa-location-dot" style="padding-right: 5px;"></i>{{ shop_admin.address }}</span>
-                </div>
-            </div>
+    
+    <div class="footer-content" style="display: flex;justify-content: center; align-items: center;margin: auto;flex-direction: column;">
+        <div class="contact-item" style="display: flex; justify-content: center; gap: 5px;width: 100%;">
+            <span class="contact-text" style="">
+                <a href="tel:{{ shop_admin.phone_number }}" style="text-decoration: none;color: #000;font-size: 12px;">+91 {{ shop_admin.phone_number }}</a>
+            </span>
         </div>
     
-        <div class="footer-bottom"  style="display: flex;justify-content:center;align-items: center;margin-top: -5px;">
-            <p style="display: flex;justify-content: center;align-items: center;text-align: center;flex-direction: column;">
-                Developed and Designed by <span style="color: #22c55e; display: block;font-weight: 600;">IMC Business Solutions:  
-                <i class="fa-solid fa-phone" ></i>
-                <a href="tel:+917593820007">+91 7593820007</a></span>
-            </p>
+        <div class="contact-item" style="display: flex; justify-content: center;align-items: start;width: 100%;text-align: center;margin-top: -15px;">
+            <div style="display: flex;justify-content: center;margin: auto;width: 100%;gap: 5px;">
+                <span class="contact-text" style="font-size: 12px;">{{ shop_admin.address }}</span>
+            </div>
         </div>
-    </footer>
+    </div>
+    
+    <div class="social-icons" style="display: flex; justify-content: center; align-items: center; gap: 15px;margin-top: -15px; font-size: larger;margin-bottom: 5px;">
+        {% if shop_admin.instagram_link %}
+            <a href="{{ shop_admin.instagram_link }}" target="_blank" style="color: #E4405F;"><i class="fab fa-instagram"></i></a>
+        {% endif %}
+        {% if shop_admin.facebook_link %}
+            <a href="{{ shop_admin.facebook_link }}" target="_blank" style="color: #1877F2;"><i class="fab fa-facebook"></i></a>
+        {% endif %}
+        {% if shop_admin.whatsapp_link %}
+            <a href="{{ shop_admin.whatsapp_link }}" target="_blank" style="color: #25D366;"><i class="fab fa-whatsapp"></i></a>
+        {% endif %}
+    </div>
+    
+    <div class="footer-bottom" style="display: flex;justify-content:center;align-items: center;margin-top: -5px;flex-direction: column;border-top: 1px solid black;width: 100%;padding-top: 5px;">
+        <div style="font-size: 12px; margin-bottom: 10px;">
+            Developed and Designed by
+        </div>
+        <div style="font-size: 12px;font-weight: 700;display: flex;align-items: center;justify-content: center;gap: 5px;margin-top: -10px;">
+            IMC Business Solutions
+            <div style="display: flex;justify-content: center;align-items: center;gap: 5px;font-size: 12px;">
+                | <a href="tel:+917593820007" style="color: black;">+91 7593820007</a>
+            </div>
+        </div>
+    </div>
+        </p>
+        
+        <!-- Social media icons section -->
+        
+    </div>
+</footer>
+
   
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

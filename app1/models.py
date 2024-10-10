@@ -12,6 +12,9 @@ class ShopAdminProfile(models.Model):
         ('payment pending', 'Payment Pending'),
         # Add other validity statuses as needed
     ]
+    instagram_link = models.URLField(max_length=200, blank=True, null=True)
+    facebook_link = models.URLField(max_length=200, blank=True, null=True)
+    whatsapp_link = models.URLField(max_length=200, blank=True, null=True)
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     shop_name = models.CharField(max_length=255)

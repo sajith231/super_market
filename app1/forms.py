@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
-from .models import UploadedImage,ShopAdminProfile
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password 
+from .models import UploadedImage, ShopAdminProfile
 
 class ShopAdminLoginForm(forms.Form):
     username = forms.CharField(
@@ -24,7 +23,7 @@ class ShopAdminLoginForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.label_suffix = ""  # Removes : from the end of labels
+        self.label_suffix = ""
 
     def clean(self):
         cleaned_data = super().clean()
@@ -35,7 +34,6 @@ class ShopAdminLoginForm(forms.Form):
             user = authenticate(username=username, password=password)
             if user is None:
                 raise forms.ValidationError('Invalid credentials', code='invalid_login')
-
         return cleaned_data
 
 class ImageUploadForm(forms.ModelForm):
@@ -54,62 +52,164 @@ class ImageUploadForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.label_suffix = ""  # Removes : from the end of labels
-
-
-
-class ShopAdminProfileForm(forms.ModelForm):
-    username = forms.CharField(max_length=150, required=True)
-    password = forms.CharField(widget=forms.PasswordInput, required=False)  # Optional field
-
-    class Meta:
-        model = ShopAdminProfile
-        fields = ['shop_name','location', 'address',  'phone_number', 'amount', 'responsible_person', 'username', 'password']
-        widgets = {
-            'shop_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'location': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
-            
-            'responsible_person': forms.TextInput(attrs={'class': 'form-control'}),
-        }
-
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        if password:
-            return password  # Return the password without hashing here
-        return None  # Return None to not change the password
-
-    
-
-
+        self.label_suffix = ""
 
 class ShopAdminCreationForm(forms.ModelForm):
-    username = forms.CharField(max_length=150, required=True)
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-    shop_name = forms.CharField(max_length=100, required=True)
-    address = forms.CharField(max_length=255, required=True)
-    phone_number = forms.CharField(max_length=15, required=True)
-    location = forms.CharField(max_length=100, required=True)  # New Location field
-    amount = forms.DecimalField(max_digits=10, decimal_places=2, required=True)  # New Amount field
-    responsible_person = forms.CharField(max_length=255, required=True)
+    username = forms.CharField(
+        max_length=150, 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}), 
+        required=True
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
+        required=True,
+        label="Confirm Password"
+    )
 
     class Meta:
         model = ShopAdminProfile
-        fields = ['username', 'password', 'shop_name', 'address', 'location', 'phone_number', 'responsible_person', 'amount']  # Added username and password
+        fields = [
+            'username', 'password', 'confirm_password', 
+            'shop_name', 'address', 'location', 
+            'phone_number', 'responsible_person', 'amount'
+        ]
+        widgets = {
+            'shop_name': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'address': forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 3}),
+            'location': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control mb-3'}),
+            'responsible_person': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label_suffix = ""
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        username = cleaned_data.get('username')
+
+        if password and confirm_password and password != confirm_password:
+            raise forms.ValidationError("Passwords do not match")
+
+        if username and User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Username already exists")
+
+        return cleaned_data
 
     def save(self, commit=True):
-        username = self.cleaned_data['username']
-        password = self.cleaned_data['password']
-        user = User.objects.create_user(username=username, password=password)
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            password=self.cleaned_data['password']
+        )
 
-        # Create the shop admin profile
-        shop_admin_profile = super(ShopAdminCreationForm, self).save(commit=False)
-        shop_admin_profile.user = user  # Link the new user to the shop admin profile
-        shop_admin_profile.validity = 'running'  # Set validity to Running
+        shop_admin_profile = super().save(commit=False)
+        shop_admin_profile.user = user
+        shop_admin_profile.validity = 'running'
+        shop_admin_profile.status = True
 
         if commit:
             shop_admin_profile.save()
 
         return shop_admin_profile
+
+class ShopAdminProfileForm(forms.ModelForm):
+    username = forms.CharField(
+        max_length=150, required=True, widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+    password = forms.CharField(
+        required=False, widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'})
+    )
+    confirm_password = forms.CharField(
+        required=False, widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'})
+    )
+    instagram_link = forms.URLField(
+        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+    )
+    facebook_link = forms.URLField(
+        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+    )
+    whatsapp_link = forms.URLField(
+        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    class Meta:
+        model = ShopAdminProfile
+        fields = [
+            'username', 'shop_name', 'address', 'location', 'phone_number', 'logo',
+            'instagram_link', 'facebook_link', 'whatsapp_link'
+        ]
+        widgets = {
+            'shop_name': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'address': forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 3}),
+            'location': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'logo': forms.ClearableFileInput(attrs={'class': 'form-control mb-3'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            raise forms.ValidationError("Passwords do not match")
+
+        return cleaned_data
+
+class ProfileSettingsForm(forms.ModelForm):
+    current_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
+        help_text='Enter current password to confirm changes'
+    )
+    new_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
+        help_text='Leave empty to keep current password'
+    )
+    confirm_new_password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    class Meta:
+        model = ShopAdminProfile
+        fields = ['shop_name', 'location', 'address', 'phone_number']
+        widgets = {
+            'shop_name': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'location': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+            'address': forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 3}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control mb-3'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label_suffix = ""
+
+    def clean(self):
+        cleaned_data = super().clean()
+        current_password = cleaned_data.get('current_password')
+        new_password = cleaned_data.get('new_password')
+        confirm_new_password = cleaned_data.get('confirm_new_password')
+
+        if new_password:
+            if not current_password:
+                raise forms.ValidationError("Please enter your current password to change password")
+            if not confirm_new_password:
+                raise forms.ValidationError("Please confirm your new password")
+            if new_password != confirm_new_password:
+                raise forms.ValidationError("New passwords do not match")
+            
+            if self.instance and self.instance.user:
+                if not self.instance.user.check_password(current_password):
+                    raise forms.ValidationError("Current password is incorrect")
+
+        return cleaned_data

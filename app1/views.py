@@ -51,7 +51,7 @@ def login_view(request):
     else:
         form = ShopAdminLoginForm()
 
-    return render(request, 'app1/shop_admin_login.html', {'form': form})
+    return render(request, 'shop_admin_login.html', {'form': form})
 
 
 @login_required
@@ -94,7 +94,7 @@ def shop_admin_dashboard(request):
         'can_edit': shop_admin.validity != 'payment pending',
     }
     
-    return render(request, 'app1/shop_admin_dashboard.html', context)
+    return render(request, 'shop_admin_dashboard.html', context)
 
 
 
@@ -150,7 +150,7 @@ def superuser_dashboard(request):
         elif status_filter == 'disabled':
             shop_admin_profiles = shop_admin_profiles.filter(status=False)
 
-    return render(request, 'app1/superuser_dashboard.html', {
+    return render(request, 'superuser_dashboard.html', {
         'shop_admin_profiles': shop_admin_profiles,
         'search_query': search_query,
         'status_filter': status_filter  # Pass the status filter to the template
@@ -181,7 +181,7 @@ def superuser_dashboard(request):
 #             username = form.cleaned_data['username']
 #             if User.objects.filter(username=username).exists():
 #                 messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
-#                 return render(request, 'app1/create_shop_admin.html', {'form': form})
+#                 return render(request, 'create_shop_admin.html', {'form': form})
 
 #             try:
 #                 shop_admin_profile = form.save(commit=False)
@@ -199,7 +199,7 @@ def superuser_dashboard(request):
 #     else:
 #         form = ShopAdminCreationForm()
 
-#     return render(request, 'app1/create_shop_admin.html', {'form': form})
+#     return render(request, 'create_shop_admin.html', {'form': form})
 
 
 def change_validity_after_365_days(profile_id):
@@ -223,7 +223,7 @@ def create_shop_admin(request):
             username = form.cleaned_data['username']
             if User.objects.filter(username=username).exists():
                 messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
-                return render(request, 'app1/create_shop_admin.html', {'form': form})
+                return render(request, 'create_shop_admin.html', {'form': form})
 
             try:
                 shop_admin_profile = form.save(commit=False)
@@ -241,7 +241,7 @@ def create_shop_admin(request):
     else:
         form = ShopAdminCreationForm()
 
-    return render(request, 'app1/create_shop_admin.html', {'form': form})
+    return render(request, 'create_shop_admin.html', {'form': form})
 
 
 
@@ -250,41 +250,64 @@ def edit_shop_admin(request, profile_id):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
 
+    # Get the shop admin profile or return 404
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
-    user = profile.user  # Get the associated User object
-
+    
     if request.method == 'POST':
         form = ShopAdminProfileForm(request.POST, instance=profile)
         if form.is_valid():
-            # Update the User object
-            user.username = form.cleaned_data['username']
-            
-            # Update password only if provided
-            password = form.cleaned_data['password']
-            if password:
-                user.set_password(password)  # Update password if provided
-            
-            user.save()  # Save the User object
-            
-            # Save the ShopAdminProfile
-            form.save()
-            
-            messages.success(request, 'Shop admin profile updated successfully!')
-            return redirect('superuser_dashboard')
+            try:
+                # Get or create associated user
+                if hasattr(profile, 'user') and profile.user:
+                    user = profile.user
+                else:
+                    # Create new user if none exists
+                    username = form.cleaned_data['username']
+                    if User.objects.filter(username=username).exists():
+                        messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
+                        return render(request, 'edit_shop_admin.html', {'form': form, 'profile': profile})
+                    
+                    user = User.objects.create_user(
+                        username=username,
+                        password=form.cleaned_data.get('password', get_random_string(12))
+                    )
+                    profile.user = user
+                
+                # Update user details
+                user.username = form.cleaned_data['username']
+                if form.cleaned_data.get('password'):
+                    user.set_password(form.cleaned_data['password'])
+                user.save()
+                
+                # Save profile
+                profile_instance = form.save(commit=False)
+                profile_instance.user = user
+                profile_instance.save()
+                
+                messages.success(request, 'Shop admin profile updated successfully!')
+                return redirect('superuser_dashboard')
+                
+            except Exception as e:
+                messages.error(request, f'An error occurred while updating the profile: {str(e)}')
+                return render(request, 'edit_shop_admin.html', {'form': form, 'profile': profile})
     else:
-        # Populate the form with current profile data
+        # Initialize form with existing data
         initial_data = {
-            'username': user.username,
+            'username': profile.user.username if hasattr(profile, 'user') and profile.user else '',
             'shop_name': profile.shop_name,
-            'address': profile.address,
             'location': profile.location,
+            'address': profile.address,
             'phone_number': profile.phone_number,
             'amount': profile.amount,
             'responsible_person': profile.responsible_person,
         }
         form = ShopAdminProfileForm(initial=initial_data)
 
-    return render(request, 'app1/edit_shop_admin.html', {'form': form, 'profile': profile})
+    return render(request, 'edit_shop_admin.html', {
+        'form': form, 
+        'profile': profile,
+        'has_user': hasattr(profile, 'user') and profile.user is not None
+    })
 
 
 @login_required
@@ -313,7 +336,7 @@ def delete_image(request, image_id):
         image.delete()
         messages.success(request, 'Image deleted successfully.')
         return redirect('shop_admin_dashboard')
-    return render(request, 'app1/confirm_delete.html', {'image': image})
+    return render(request, 'confirm_delete.html', {'image': image})
 
 
 @login_required
@@ -362,7 +385,7 @@ def upload_image_view(request):  # Changed the name from `UploadedImage` to `upl
     else:
         form = ImageUploadForm()
     
-    return render(request, 'app1/upload_image.html', {'form': form})
+    return render(request, 'upload_image.html', {'form': form})
 
 
 @login_required
@@ -374,7 +397,7 @@ def index(request):
         # Retrieve only the images uploaded by this shop admin
         images = UploadedImage.objects.filter(shop_admin_profile=shop_admin_profile)
 
-        return render(request, 'app1/index.html', {'images': images, 'shop_admin': shop_admin_profile})
+        return render(request, 'index.html', {'images': images, 'shop_admin': shop_admin_profile})
     
     except ShopAdminProfile.DoesNotExist:
         # If the user doesn't have a shop admin profile, redirect them or show an error
@@ -396,7 +419,7 @@ def delete_shop_admin(request, profile_id):
             messages.success(request, 'Shop admin deleted successfully!')
             return redirect('superuser_dashboard')
         else:
-            return render(request, 'app1/confirm_delete_shop_admin.html', {'profile': profile})
+            return render(request, 'confirm_delete_shop_admin.html', {'profile': profile})
     
     except ShopAdminProfile.DoesNotExist:
         messages.error(request, f'Shop admin with ID {profile_id} does not exist.')
@@ -464,7 +487,7 @@ def index_with_uid(request, uid):
             'location': shop_admin.location,
         }
     }
-    return render(request, 'app1/index.html', context)
+    return render(request, 'index.html', context)
 
 
 
@@ -482,6 +505,59 @@ def download_qr_code(request):
     # If QR code doesn't exist or file is not found, redirect to generate QR code
     return redirect('generate_qr_code')
 
+
+
+@login_required
+def home(request):
+    shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
+    profile_updated = False  # Initialize a flag
+
+    if request.method == 'POST':
+        form = ShopAdminProfileForm(request.POST, request.FILES, instance=shop_admin)
+        if form.is_valid():
+            # Handle username change
+            new_username = form.cleaned_data.get('username')
+            if new_username and new_username != shop_admin.user.username:
+                if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
+                    messages.error(request, 'Username already exists!')
+                    return render(request, 'home.html', {'form': form, 'shop_admin': shop_admin})
+                shop_admin.user.username = new_username
+                shop_admin.user.save()
+
+            # Handle password change
+            new_password = form.cleaned_data.get('password')
+            if new_password:
+                shop_admin.user.set_password(new_password)
+                shop_admin.user.save()
+                messages.success(request, 'Password updated successfully. Please login again.')
+                logout(request)
+                return redirect('shop_admin_login')
+
+            # Save other profile changes
+            shop_admin = form.save(commit=False)
+
+            # Handle logo upload
+            if 'logo' in request.FILES:
+                shop_admin.logo = request.FILES['logo']
+            
+            shop_admin.save()
+            messages.success(request, 'Profile updated successfully!')
+            profile_updated = True  # Set the flag to True
+            return redirect('home')
+    else:
+        form = ShopAdminProfileForm(instance=shop_admin, initial={
+            'username': shop_admin.user.username,
+            'instagram_link': shop_admin.instagram_link,
+            'facebook_link': shop_admin.facebook_link,
+            'whatsapp_link': shop_admin.whatsapp_link
+        })
+
+    context = {
+        'form': form,
+        'shop_admin': shop_admin,
+        'profile_updated': profile_updated,  # Pass the flag to the template
+    }
+    return render(request, 'home.html', context)
 
 
 
