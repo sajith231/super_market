@@ -38,19 +38,7 @@
             {% csrf_token %}
             {{ form.non_field_errors }}
 
-            <div class="mb-3" style="width: 100%;" >
-                {{ form.username.label_tag }} {{ form.username }}
-            </div>
-
-            <div class="mb-3" style="width: 100%;">
-                {{ form.password.label_tag }} {{ form.password }}
-                <small>{{ form.password.help_text }}</small>
-            </div>
-
-            <div class="mb-3" style="width: 100%;">
-                {{ form.confirm_password.label_tag }} {{ form.confirm_password }}
-                <small>{{ form.confirm_password.help_text }}</small>
-            </div>
+            
 
             <div class="mb-3" style="width: 100%;">
                 {{ form.shop_name.label_tag }} {{ form.shop_name }}
@@ -82,6 +70,22 @@
 
             <div class="mb-3" style="width: 100%;">
                 {{ form.whatsapp_link.label_tag }} {{ form.whatsapp_link }}
+            </div>
+            <div class="mb-3" style="width: 100%;">
+                {{ form.google_link.label_tag }} {{ form.google_link }}
+            </div>
+            <div class="mb-3" style="width: 100%;" >
+                {{ form.username.label_tag }} {{ form.username }}
+            </div>
+
+            <div class="mb-3" style="width: 100%;">
+                {{ form.password.label_tag }} {{ form.password }}
+                <small>{{ form.password.help_text }}</small>
+            </div>
+
+            <div class="mb-3" style="width: 100%;">
+                {{ form.confirm_password.label_tag }} {{ form.confirm_password }}
+                <small>{{ form.confirm_password.help_text }}</small>
             </div>
 
             <button type="submit" class="btn btn-primary">Update Profile</button>

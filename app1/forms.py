@@ -139,12 +139,15 @@ class ShopAdminProfileForm(forms.ModelForm):
     whatsapp_link = forms.URLField(
         required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
     )
+    google_link = forms.URLField(
+        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+    )
 
     class Meta:
         model = ShopAdminProfile
         fields = [
             'username', 'shop_name', 'address', 'location', 'phone_number', 'logo',
-            'instagram_link', 'facebook_link', 'whatsapp_link'
+            'instagram_link', 'facebook_link', 'whatsapp_link', 'google_link'
         ]
         widgets = {
             'shop_name': forms.TextInput(attrs={'class': 'form-control mb-3'}),

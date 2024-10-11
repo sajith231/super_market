@@ -324,9 +324,13 @@ def toggle_status(request, profile_id):
         threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
     
     profile.save()
-    status_text = "enabled" if profile.status else "disabled"
-    messages.success(request, f'Shop admin account has been {status_text}.')
+    
+    # Removed the success message here
+    # status_text = "enabled" if profile.status else "disabled"
+    # messages.success(request, f'Shop admin account has been {status_text}.')
+    
     return redirect('superuser_dashboard')
+
     
 
 @login_required
@@ -549,7 +553,9 @@ def home(request):
             'username': shop_admin.user.username,
             'instagram_link': shop_admin.instagram_link,
             'facebook_link': shop_admin.facebook_link,
-            'whatsapp_link': shop_admin.whatsapp_link
+            'whatsapp_link': shop_admin.whatsapp_link,
+            'google_link': shop_admin.google_link
+           
         })
 
     context = {

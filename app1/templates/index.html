@@ -167,15 +167,15 @@
     </div>
     
     
-    <main class="main-content">
+    
         <div style="width: 100%;height: 60px;margin-bottom: 10px;">
             <img src="{% static 'images/offer.png' %}" style="width: 100%;height: 100%;object-fit: contain;" alt="">
         </div>
-        <div id="imageCarousel" class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner">
+        <div id="imageCarousel" class="carousel slide" style="width: 100%; height: 350px;" data-ride="carousel">
+            <div class="carousel-inner" style="width: 100%;height: 100%;object-fit: cover;">
                 {% for image in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="object-fit: cover; height: 300px;" onclick="openModal({{ forloop.counter0 }})">
+                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="width: 100%;height: 100%;object-fit: cover;" onclick="openModal({{ forloop.counter0 }})">
                     </div>
                 {% empty %}
                     <div class="carousel-item active">
@@ -233,9 +233,9 @@
                 </div>
             </div>
         </div>
-    </main>
+
     
-    <div class="footer-content" style="display: flex;justify-content: center; align-items: center;margin: auto;flex-direction: column;">
+    <div class="" style="display: flex;justify-content: center; align-items: center;flex-direction: column;margin-top: 20px;padding: 10px;">
         <div class="contact-item" style="display: flex; justify-content: center; gap: 5px;width: 100%;">
             <span class="contact-text" style="">
                 <a href="tel:{{ shop_admin.phone_number }}" style="text-decoration: none;color: #000;font-size: 12px;">+91 {{ shop_admin.phone_number }}</a>
@@ -259,6 +259,10 @@
         {% if shop_admin.whatsapp_link %}
             <a href="{{ shop_admin.whatsapp_link }}" target="_blank" style="color: #25D366;"><i class="fab fa-whatsapp"></i></a>
         {% endif %}
+        {% if shop_admin.google_link %}
+    <a href="{{ shop_admin.google_link }}" target="_blank" style="color: #4285F4;"><i class="fab fa-google"></i></a>
+{% endif %}
+
     </div>
     
     <div class="footer-bottom" style="display: flex;justify-content:center;align-items: center;margin-top: -5px;flex-direction: column;border-top: 1px solid black;width: 100%;padding-top: 5px;">
