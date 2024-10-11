@@ -7,6 +7,8 @@
     <title>{{ shop_admin.shop_name }}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
@@ -212,7 +214,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div id="modalCarousel" class="carousel slide" data-ride="carousel">
+                        
                             <div class="carousel-inner">
                                 {% for image in images %}
                                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
@@ -240,13 +242,15 @@
     <div class="" style="display: flex;justify-content: center; align-items: center;flex-direction: column;margin-top: 20px;padding: 10px;">
         <div class="contact-item" style="display: flex; justify-content: center; gap: 5px;width: 100%;">
             <span class="contact-text" >
+                <i class="fas fa-phone" style="font-size: small;"  ></i> 
                 <a href="tel:{{ shop_admin.phone_number }}" style="text-decoration: none;color: #000;font-size: 12px;">+91 {{ shop_admin.phone_number }}</a>
             </span>
         </div>
     
         <div class="contact-item" style="display: flex; justify-content: center;align-items: start;width: 100%;text-align: center;margin-top: -15px;">
             <div style="display: flex;justify-content: center;margin: auto;width: 100%;gap: 5px;">
-                <span class="contact-text" style="font-size: 12px;">{{ shop_admin.address }}</span>
+                
+                <span class="contact-text" style="font-size: 12px;"><i class="fas fa-map-marker-alt" style="font-size: 12px; color: black;margin-right: 1%;"></i>{{ shop_admin.address }}</span>
             </div>
         </div>
     </div>
@@ -274,7 +278,8 @@
         <div style="font-size: 12px;font-weight: 700;display: flex;align-items: center;justify-content: center;gap: 5px;margin-top: -10px;">
             IMC Business Solutions
             <div style="display: flex;justify-content: center;align-items: center;gap: 5px;font-size: 12px;">
-                | <a href="tel:+917593820007" style="color: black;">+91 7593820007</a>
+                <i class="fas fa-phone"></i> 
+                <a href="tel:+917593820007" style="color: black;">+91 7593820007</a>
             </div>
         </div>
     </div>

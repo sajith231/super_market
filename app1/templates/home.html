@@ -12,7 +12,7 @@
 </style>
 
 <div style="display: flex;justify-content: end;align-items: end; margin-top: 10px;">
-    <a href="{% url 'shop_admin_dashboard' %}" class="btn btn-secondary">Go to Dashboard</a>
+    <a href="{% url 'shop_admin_dashboard' %}" class="btn btn-secondary" style="background-color: green;">Go to Dashboard</a>
 </div>
 
 <div style="width: 100%; margin-top: 10px;display: block; justify-content: center;align-items: start;gap: 20px;" class="Responsive">
@@ -43,6 +43,9 @@
             <div class="mb-3" style="width: 100%;">
                 {{ form.shop_name.label_tag }} {{ form.shop_name }}
             </div>
+            <div class="mb-3" style="width: 100%;">
+                {{ form.logo.label_tag }} {{ form.logo }}
+            </div>
 
             <div class="mb-3" style="width: 100%;">
                 {{ form.address.label_tag }} {{ form.address }}
@@ -56,9 +59,7 @@
                 {{ form.phone_number.label_tag }} {{ form.phone_number }}
             </div>
 
-            <div class="mb-3" style="width: 100%;">
-                {{ form.logo.label_tag }} {{ form.logo }}
-            </div>
+            
 
             <div class="mb-3" style="width: 100%;">
                 {{ form.instagram_link.label_tag }} {{ form.instagram_link }}
