@@ -312,20 +312,38 @@
             let isZoomed = false;
             let startX, startY, translateX = 0, translateY = 0;
     
-            $('.zoomable').on('click', function(e) {
+            // Double click for desktop, double tap for mobile
+            $('.zoomable').on('dblclick', function(e) {
+                toggleZoom($(this));
+            });
+    
+            // Touch handling for mobile devices
+            $('.zoomable').on('touchstart', function(e) {
+                if (e.originalEvent.touches.length === 1) {  // Single finger touch
+                    let tapTime = new Date().getTime();
+                    if (tapTime - $(this).data('lastTap') < 300) {  // Double-tap detection
+                        toggleZoom($(this));
+                    }
+                    $(this).data('lastTap', tapTime);
+                }
+            });
+    
+            // Function to handle zoom toggle
+            function toggleZoom(element) {
                 if (!isZoomed) {
-                    $(this).css('transform', 'scale(2)');
-                    $(this).addClass('zoomed');
+                    element.css('transform', 'scale(2)');
+                    element.addClass('zoomed');
                     isZoomed = true;
                 } else {
-                    $(this).css('transform', 'scale(1) translate(0, 0)');
-                    $(this).removeClass('zoomed');
+                    element.css('transform', 'scale(1) translate(0, 0)');
+                    element.removeClass('zoomed');
                     isZoomed = false;
                     translateX = 0;
                     translateY = 0;
                 }
-            });
+            }
     
+            // Handle dragging the zoomed image
             $('.img-container').on('mousedown touchstart', '.zoomed', function(e) {
                 e.preventDefault();
                 startX = e.type === 'mousedown' ? e.clientX : e.originalEvent.touches[0].clientX;
@@ -347,10 +365,12 @@
                 });
             });
     
+            // Release the image after dragging
             $(document).on('mouseup touchend', function() {
                 $(document).off('mousemove touchmove');
             });
     
+            // Reset zoom when modal closes
             $('#imageModal').on('hidden.bs.modal', function () {
                 $('.zoomable').css('transform', 'scale(1) translate(0, 0)');
                 $('.zoomable').removeClass('zoomed');
@@ -360,5 +380,7 @@
             });
         });
     </script>
+    
+    
 </body>
 </html>
