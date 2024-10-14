@@ -63,7 +63,6 @@ def shop_admin_dashboard(request):
             if request.FILES.get('shop_logo'):
                 shop_admin.logo = request.FILES['shop_logo']
                 shop_admin.save()
-                messages.success(request, 'Shop logo uploaded successfully!')
         elif 'upload_image' in request.POST:
             form = ImageUploadForm(request.POST, request.FILES)
             if form.is_valid():
@@ -71,7 +70,6 @@ def shop_admin_dashboard(request):
                 new_image.shop_admin_profile = shop_admin
                 new_image.display_order = UploadedImage.objects.filter(shop_admin_profile=shop_admin).count() + 1
                 new_image.save()
-                messages.success(request, 'Image uploaded successfully!')
             else:
                 messages.error(request, 'Error uploading image. Please check the file format and try again.')
                 print("Form errors:", form.errors)  # debugging print for errors
@@ -293,9 +291,9 @@ def delete_image(request, image_id):
     image = get_object_or_404(UploadedImage, id=image_id)
     if request.method == 'POST':
         image.delete()
-        messages.success(request, 'Image deleted successfully.')
         return redirect('shop_admin_dashboard')
     return render(request, 'confirm_delete.html', {'image': image})
+
 
 
 @login_required
