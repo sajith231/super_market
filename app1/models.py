@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.crypto import get_random_string
-
+from datetime import timedelta
 
     
 
@@ -31,6 +31,16 @@ class ShopAdminProfile(models.Model):
     responsible_person = models.CharField(max_length=255, null=True, blank=True)
     uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
     logo = models.ImageField(upload_to='shop_logos/', blank=True, null=True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.uid:
+            self.uid = get_random_string(20)
+        if self.validity == 'payment pending':
+            self.status = False
+        if not self.expiry_date:
+            self.expiry_date = timezone.now() + timedelta(days=365)
+        super().save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         if not self.uid:

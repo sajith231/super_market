@@ -257,13 +257,21 @@
     
     <div class="social-icons" style="display: flex; justify-content: center; align-items: center; gap: 15px;margin-top: -15px; font-size: larger;margin-bottom: 5px;">
         {% if shop_admin.instagram_link %}
-            <a href="{{ shop_admin.instagram_link }}" target="_blank" style="color: #E4405F;"><i class="fab fa-instagram"></i></a>
+        <a href="{{ shop_admin.instagram_link }}" target="_blank" style="color: #E4405F;">
+            <i class="fab fa-instagram"></i>
+        </a>
+        {% else %}
+        <i class="fab fa-instagram" style="color: #E4405F;"></i>
         {% endif %}
         {% if shop_admin.facebook_link %}
             <a href="{{ shop_admin.facebook_link }}" target="_blank" style="color: #1877F2;"><i class="fab fa-facebook"></i></a>
+        {% else %}
+        <i class="fab fa-facebook"></i>
         {% endif %}
         {% if shop_admin.whatsapp_link %}
             <a href="{{ shop_admin.whatsapp_link }}" target="_blank" style="color: #25D366;"><i class="fab fa-whatsapp"></i></a>
+        {% else %}
+        <i class="fab fa-whatsapp">
         {% endif %}
         {% if shop_admin.google_link %}
     <a href="{{ shop_admin.google_link }}" target="_blank" style="color: #4285F4;"><i class="fab fa-google"></i></a>

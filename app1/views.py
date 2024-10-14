@@ -74,7 +74,7 @@ def shop_admin_dashboard(request):
                 messages.success(request, 'Image uploaded successfully!')
             else:
                 messages.error(request, 'Error uploading image. Please check the file format and try again.')
-                print("Form errors:", form.errors)  # Debugging print for form errors
+                print("Form errors:", form.errors)  # debugging print for errors
         elif 'generate_qr' in request.POST:
             return generate_qr_code(request)
     
@@ -135,25 +135,27 @@ def superuser_dashboard(request):
         return HttpResponseForbidden("You don't have permission to access this page.")
 
     search_query = request.GET.get('search', '')
-    status_filter = request.GET.get('status', '')  # Get the status filter
+    status_filter = request.GET.get('status', '')
 
     shop_admin_profiles = ShopAdminProfile.objects.all()
 
-    # Apply the search filter
     if search_query:
         shop_admin_profiles = shop_admin_profiles.filter(shop_name__icontains=search_query)
 
-    # Apply the status filter
     if status_filter:
         if status_filter == 'enabled':
             shop_admin_profiles = shop_admin_profiles.filter(status=True)
         elif status_filter == 'disabled':
             shop_admin_profiles = shop_admin_profiles.filter(status=False)
 
+    for profile in shop_admin_profiles:
+        if profile.expiry_date:
+            profile.days_until_expiry = (profile.expiry_date - timezone.now()).days
+
     return render(request, 'superuser_dashboard.html', {
         'shop_admin_profiles': shop_admin_profiles,
         'search_query': search_query,
-        'status_filter': status_filter  # Pass the status filter to the template
+        'status_filter': status_filter
     })
 
 

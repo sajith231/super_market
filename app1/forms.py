@@ -55,6 +55,26 @@ class ImageUploadForm(forms.ModelForm):
         self.label_suffix = ""
 
 class ShopAdminCreationForm(forms.ModelForm):
+    shop_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+    address = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 3})
+    )
+    location = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+    phone_number = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+    amount = forms.DecimalField(
+        widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
+    )
+    responsible_person = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    # Moving username, password, and confirm_password to the end
     username = forms.CharField(
         max_length=150, 
         required=True,
@@ -73,9 +93,9 @@ class ShopAdminCreationForm(forms.ModelForm):
     class Meta:
         model = ShopAdminProfile
         fields = [
-            'username', 'password', 'confirm_password', 
-            'shop_name', 'address', 'location', 
-            'phone_number', 'responsible_person', 'amount'
+            'shop_name', 'address', 'location', 'phone_number', 
+            'responsible_person', 'amount', 
+            'username', 'password', 'confirm_password'
         ]
         widgets = {
             'shop_name': forms.TextInput(attrs={'class': 'form-control mb-3'}),
