@@ -177,7 +177,7 @@
             <div class="carousel-inner" style="width: 100%;height: 100%;object-fit: cover;">
                 {% for image in images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="width: 100%;height: 100%;object-fit: cover;" onclick="openModal({{ forloop.counter0 }})">
+                        <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100" style="width: 100%;height: 100%;object-fit: cover;" onclick="openModal(this)">
                     </div>
                 {% empty %}
                     <div class="carousel-item active">
@@ -214,24 +214,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        
-                            <div class="carousel-inner">
-                                {% for image in images %}
-                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                        <div class="img-container" style="overflow: hidden; height: calc(100vh - 150px);">
-                                            <img src="{{ image.image.url }}" alt="Featured Image" class="d-block w-100 zoomable" style="object-fit: contain; transition: transform 0.3s;height: 100%;width: 100%;">
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <a class="carousel-control-prev" href="#modalCarousel" role="button" data-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="carousel-control-next" href="#modalCarousel" role="button" data-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Next</span>
-                            </a>
+                        <div class="img-container" style="overflow: hidden; height: calc(100vh - 150px);">
+                            <img id="modalImage" src="" alt="Featured Image" class="d-block w-100 zoomable" style="object-fit: contain; transition: transform 0.3s;height: 100%;width: 100%;">
                         </div>
                     </div>
                 </div>
@@ -327,20 +311,20 @@
     </style>
     
     <script>
-        function openModal(index) {
+        function openModal(img) {
+            $('#modalImage').attr('src', img.src);
             $('#imageModal').modal('show');
-            $('#modalCarousel').carousel(index);
         }
-    
+
         $(document).ready(function() {
             let isZoomed = false;
             let startX, startY, translateX = 0, translateY = 0;
-    
+
             // Double click for desktop, double tap for mobile
             $('.zoomable').on('dblclick', function(e) {
                 toggleZoom($(this));
             });
-    
+
             // Touch handling for mobile devices
             $('.zoomable').on('touchstart', function(e) {
                 if (e.originalEvent.touches.length === 1) {  // Single finger touch
@@ -351,7 +335,7 @@
                     $(this).data('lastTap', tapTime);
                 }
             });
-    
+
             // Function to handle zoom toggle
             function toggleZoom(element) {
                 if (!isZoomed) {
@@ -366,34 +350,34 @@
                     translateY = 0;
                 }
             }
-    
+
             // Handle dragging the zoomed image
             $('.img-container').on('mousedown touchstart', '.zoomed', function(e) {
                 e.preventDefault();
                 startX = e.type === 'mousedown' ? e.clientX : e.originalEvent.touches[0].clientX;
                 startY = e.type === 'mousedown' ? e.clientY : e.originalEvent.touches[0].clientY;
-    
+
                 $(document).on('mousemove touchmove', function(e) {
                     if (!isZoomed) return;
                     e.preventDefault();
                     let clientX = e.type === 'mousemove' ? e.clientX : e.originalEvent.touches[0].clientX;
                     let clientY = e.type === 'mousemove' ? e.clientY : e.originalEvent.touches[0].clientY;
-    
+
                     translateX += clientX - startX;
                     translateY += clientY - startY;
-    
+
                     startX = clientX;
                     startY = clientY;
-    
+
                     $('.zoomed').css('transform', `scale(2) translate(${translateX}px, ${translateY}px)`);
                 });
             });
-    
+
             // Release the image after dragging
             $(document).on('mouseup touchend', function() {
                 $(document).off('mousemove touchmove');
             });
-    
+
             // Reset zoom when modal closes
             $('#imageModal').on('hidden.bs.modal', function () {
                 $('.zoomable').css('transform', 'scale(1) translate(0, 0)');
