@@ -21,3 +21,22 @@ def add_years(value, years):
         return value.replace(year=new_year, month=new_month, day=new_day)
     except (ValueError, TypeError):
         return value
+
+
+
+from django import template
+from django.utils import timezone
+from datetime import timedelta
+
+print("Loading custom_filters.py")  # Add this line
+
+register = template.Library()
+
+@register.filter
+def get_expiry_date(profile):
+    if profile.expiry_date:
+        return profile.expiry_date
+    elif profile.created_at:
+        return profile.created_at + timedelta(days=365)
+    else:
+        return timezone.now() + timedelta(days=365)

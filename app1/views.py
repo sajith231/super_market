@@ -23,6 +23,7 @@ from django.db import IntegrityError
 from django.contrib.auth.models import User
 import time
 from urllib.parse import urljoin
+from datetime import timedelta
 
 def login_view(request):
     if request.method == 'POST':
@@ -275,15 +276,18 @@ def toggle_status(request, profile_id):
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
     profile.status = not profile.status
     
-    if profile.status and profile.validity != 'payment pending':
+    if profile.status:  # If the profile is being enabled
         profile.validity = 'running'
-        # Start a thread to change the validity status after one minute
+        profile.expiry_date = timezone.now() + timedelta(days=365)  # Set expiry to one year from now
+        # Start a thread to change the validity status after one year
         threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
+    else:
+        profile.expiry_date = None  # Clear the expiry date when disabling
     
     profile.save()
-    
+    status_text = "enabled" if profile.status else "disabled"
+    messages.success(request, f'Shop admin account has been {status_text}.')
     return redirect('superuser_dashboard')
-
     
 
 @login_required
@@ -306,7 +310,9 @@ def toggle_status(request, profile_id):
     
     if profile.status:  # If the profile is being enabled
         profile.validity = 'running'
-        # Start a thread to change the validity status after one minute
+        if not profile.expiry_date:  # Only set expiry_date if it's not already set
+            profile.expiry_date = timezone.now() + timedelta(days=365)
+        # Start a thread to change the validity status after one year
         threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
     
     profile.save()
@@ -520,9 +526,20 @@ def home(request):
 
 
 
+from django import template
+from django.utils import timezone
+from datetime import timedelta
 
+register = template.Library()
 
-
+@register.filter
+def get_expiry_date(profile):
+    if profile.expiry_date:
+        return profile.expiry_date
+    elif profile.created_at:
+        return profile.created_at + timedelta(days=365)
+    else:
+        return timezone.now() + timedelta(days=365)
 
 
 

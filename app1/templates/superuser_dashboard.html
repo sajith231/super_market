@@ -150,13 +150,7 @@
                             </form> -->
                         </td>
                         <td>
-                            {% if profile.created_at %}
-                            <span style="white-space: nowrap;">
-                                {{ profile.created_at|add_years:1|date:"Y-m-d" }}
-                            </span>
-                            {% else %}
-                                N/A
-                            {% endif %}
+                           <span style="white-space: nowrap;"> {{ profile|get_expiry_date|date:"Y-m-d" }}</span>
                         </td>
                         <td>
                             <div style="display: flex;">
