@@ -124,7 +124,7 @@ class ShopAdminCreationForm(forms.ModelForm):
 
         return cleaned_data
 
-    def save(self, commit=True):
+    def save(self, commit=True):                                     
         user = User.objects.create_user(
             username=self.cleaned_data['username'],
             password=self.cleaned_data['password']

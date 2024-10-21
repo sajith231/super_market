@@ -95,29 +95,16 @@ WSGI_APPLICATION = 'marketpro.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'super_market_6301',
-        'USER': 'sajiththomas',
-        'PASSWORD': 'pVpBRbHml1LQnGuN8uW7a9dlsS3PITIk',
-        'HOST': 'dpg-cruj0ebtq21c738jl3vg-a.singapore-postgres.render.com',   # this section must add(singapore-postgres.render.com)',
+        'NAME': 'supermarketpro',
+        'USER': 'postgres',
+        'PASSWORD': 'sajith@2003',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME':'supermarketpro',
-#         'USER':'root',
-#         'PASSWORD':'',
-#     }
-# }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',  # Use SQLite backend
-#         'NAME': BASE_DIR / 'db.sqlite3',         # Path to your SQLite database file
-#     }
-# }
+
 
 
 
