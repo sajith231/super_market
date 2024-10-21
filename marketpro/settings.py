@@ -31,7 +31,8 @@ ALLOWED_HOSTS = [
     'super-market-h0gf.onrender.com',
     'localhost',
     '127.0.0.1',
-    '13.233.145.51',  # Your server IP
+    '13.233.145.51',
+    '13.233.251.219'  # Your server IP
 ]
 
 # New settings for server configuration
