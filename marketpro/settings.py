@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'marketpro.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'supermarketpro',
         'USER': 'postgres',
         'PASSWORD': 'sajith@2003',
