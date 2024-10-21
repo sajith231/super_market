@@ -208,18 +208,15 @@ def edit_shop_admin(request, profile_id):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You don't have permission to access this page.")
 
-    # Get the shop admin profile or return 404
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
     
     if request.method == 'POST':
-        form = ShopAdminProfileForm(request.POST, instance=profile)
+        form = ShopAdminProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             try:
-                # Get or create associated user
                 if hasattr(profile, 'user') and profile.user:
                     user = profile.user
                 else:
-                    # Create new user if none exists
                     username = form.cleaned_data['username']
                     if User.objects.filter(username=username).exists():
                         messages.error(request, f"Username '{username}' already exists. Please choose a different username.")
@@ -231,13 +228,11 @@ def edit_shop_admin(request, profile_id):
                     )
                     profile.user = user
                 
-                # Update user details
                 user.username = form.cleaned_data['username']
                 if form.cleaned_data.get('password'):
                     user.set_password(form.cleaned_data['password'])
                 user.save()
                 
-                # Save profile
                 profile_instance = form.save(commit=False)
                 profile_instance.user = user
                 profile_instance.save()
@@ -249,7 +244,6 @@ def edit_shop_admin(request, profile_id):
                 messages.error(request, f'An error occurred while updating the profile: {str(e)}')
                 return render(request, 'edit_shop_admin.html', {'form': form, 'profile': profile})
     else:
-        # Initialize form with existing data
         initial_data = {
             'username': profile.user.username if hasattr(profile, 'user') and profile.user else '',
             'shop_name': profile.shop_name,
@@ -258,8 +252,12 @@ def edit_shop_admin(request, profile_id):
             'phone_number': profile.phone_number,
             'amount': profile.amount,
             'responsible_person': profile.responsible_person,
+            'instagram_link': profile.instagram_link,
+            'facebook_link': profile.facebook_link,
+            'whatsapp_link': profile.whatsapp_link,
+            'google_link': profile.google_link,
         }
-        form = ShopAdminProfileForm(initial=initial_data)
+        form = ShopAdminProfileForm(instance=profile, initial=initial_data)
 
     return render(request, 'edit_shop_admin.html', {
         'form': form, 

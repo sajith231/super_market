@@ -8,7 +8,7 @@
         color: #fff;
         padding: 20px;
     }
-   </style>
+</style>
 <div class="container mt-3" style="width: 100%;">
     <div class="row justify-content-center" style="width: 100%;">
         <div class="col-md-8">
@@ -16,10 +16,10 @@
                 <div class="card-header bg-primary text-white">
                     <h2 class="text-center mb-0">Edit Shop Admin</h2>
                 </div>
-                <div class="card-body" >
-                    <form method="post"style="width: 100%;" >
+                <div class="card-body">
+                    <form method="post" style="width: 100%;" enctype="multipart/form-data">
                         {% csrf_token %}
-
+                        
                         {% for field in form %}
                             <div class="mb-3" style="color: black;">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -34,7 +34,7 @@
                                 {% endif %}
                             </div>
                         {% endfor %}
-
+                        
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Update Shop Admin</button>
                             <a href="{% url 'superuser_dashboard' %}" class="btn btn-secondary">Cancel</a>
