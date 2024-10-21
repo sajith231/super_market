@@ -37,7 +37,7 @@ ALLOWED_HOSTS = [
 
 # New settings for server configuration
 PRODUCTION_SERVER = {
-    'IP': '13.233.145.51',  # Your production server IP
+    'IP': '13.233.251.219',  # Your production server IP
     'PORT': '8000',         # Your production server port
     'USE_HTTPS': False,     # Set to True if using HTTPS
 }
