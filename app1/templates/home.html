@@ -2,12 +2,12 @@
 {% load static %}
 {% block content %}
 
-<div style="display: flex;justify-content: end;align-items: end; margin-top: 10px;">
+<div style="display: flex; justify-content: end; align-items: end; margin-top: 10px;">
     <a href="{% url 'shop_admin_dashboard' %}" class="btn btn-secondary" style="background-color: green;">Go to Dashboard</a>
 </div>
 
-<div class="Responsive" style="width: 100%; margin-top: 10px;display: block; justify-content: center;align-items: start;gap: 20px;">
-    <div style="display: flex;flex-direction: column;justify-content: center;align-items: center;width: 100%;border: 1px solid black;padding: 20px;border-radius: 20px; background-color: rgb(184, 184, 184);">
+<div class="Responsive" style="width: 100%; margin-top: 10px; display: block; justify-content: center; align-items: start; gap: 20px;">
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; border: 1px solid black; padding: 20px; border-radius: 20px; background-color: rgb(184, 184, 184);">
         <h2 id="update-your-profile" style="margin-bottom: 10px;">Update Your Profile</h2>
 
         <div class="container">
@@ -25,6 +25,7 @@
             {{ form.non_field_errors }}
 
             {% for field in form %}
+            {% if field.name != 'amount' %}
             <div class="mb-3" style="width: 100%;">
                 {{ field.label_tag }}
                 {{ field }}
@@ -35,6 +36,7 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
             </div>
+            {% endif %}
             {% endfor %}
 
             <button type="submit" class="btn btn-primary">Update Profile</button>
