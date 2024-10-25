@@ -311,8 +311,9 @@ def toggle_status(request, profile_id):
         profile.expiry_date = timezone.now() + timedelta(days=365)  # Set expiry to 365 days from now
         # Start a thread to change the validity status after 365 days
         threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
-    else:
-        profile.expiry_date = None  # Clear the expiry date when disabling
+    else:  # If the profile is being disabled
+        # Store the current expiry date as the latest expiry date
+        profile.expiry_date = timezone.now()  # Set to current time when disabled
     
     profile.save()
     status_text = "enabled" if profile.status else "disabled"
@@ -551,13 +552,16 @@ from datetime import timedelta
 
 register = template.Library()
 
+
 @register.filter
 def get_expiry_date(profile):
-    if profile.expiry_date:
+    if not profile.status:  # If profile is disabled
+        return profile.expiry_date if profile.expiry_date else timezone.now()
+    elif profile.expiry_date:  # If profile has an expiry date
         return profile.expiry_date
-    elif profile.created_at:
+    elif profile.created_at:  # Fallback to created_at + 365 days
         return profile.created_at + timedelta(days=365)
-    else:
+    else:  # Final fallback
         return timezone.now() + timedelta(days=365)
 
 
