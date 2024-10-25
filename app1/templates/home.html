@@ -20,26 +20,30 @@
             {% endif %}
         </div>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" style="width: 100%;">
             {% csrf_token %}
             {{ form.non_field_errors }}
-
+            
             {% for field in form %}
-            {% if field.name != 'amount' %}
-            <div class="mb-3" style="width: 100%;">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% if field.name != 'amount' %}
+                <div class="mb-3" style="width: 100%;">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="small">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-                {% for error in field.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-            {% endif %}
             {% endfor %}
 
-            <button type="submit" class="btn btn-primary">Update Profile</button>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </div>
         </form>
     </div>
 </div>

@@ -142,13 +142,19 @@ class ShopAdminCreationForm(forms.ModelForm):
 
 class ShopAdminProfileForm(forms.ModelForm):
     username = forms.CharField(
-        max_length=150, required=True, widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+        max_length=150, 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
     )
     password = forms.CharField(
-        required=False, widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'})
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
+        help_text="Leave empty if you don't want to change it"
     )
     confirm_password = forms.CharField(
-        required=False, widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'})
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
+        help_text="Confirm new password"
     )
     shop_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
@@ -157,27 +163,28 @@ class ShopAdminProfileForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
     )
     instagram_link = forms.URLField(
-        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+        required=False,
+        widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
     )
     facebook_link = forms.URLField(
-        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+        required=False,
+        widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
     )
     whatsapp_link = forms.URLField(
-        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
+        required=False,
+        widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
     )
     google_link = forms.URLField(
-        required=False, widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
-    )
-    amount = forms.DecimalField(
-        widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
+        required=False,
+        widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
     )
 
     class Meta:
         model = ShopAdminProfile
         fields = [
-            'username', 'shop_name', 'responsible_person', 'address', 'location', 
-            'phone_number', 'logo', 'instagram_link', 'facebook_link', 'whatsapp_link', 
-            'google_link', 'amount'
+            'username', 'shop_name', 'responsible_person', 'address', 
+            'location', 'phone_number', 'logo', 'instagram_link', 
+            'facebook_link', 'whatsapp_link', 'google_link'
         ]
         widgets = {
             'address': forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 3}),
@@ -188,8 +195,8 @@ class ShopAdminProfileForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
 
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match")

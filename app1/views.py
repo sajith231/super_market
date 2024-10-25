@@ -472,56 +472,76 @@ def download_qr_code(request):
 @login_required
 def home(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
-    profile_updated = False  # Initialize a flag
 
     if request.method == 'POST':
         form = ShopAdminProfileForm(request.POST, request.FILES, instance=shop_admin)
         if form.is_valid():
-            # Handle username change
-            new_username = form.cleaned_data.get('username')
-            if new_username and new_username != shop_admin.user.username:
-                if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
-                    messages.error(request, 'Username already exists!')
-                    return render(request, 'home.html', {'form': form, 'shop_admin': shop_admin})
-                shop_admin.user.username = new_username
-                shop_admin.user.save()
+            try:
+                # Handle username change if it's different
+                new_username = form.cleaned_data.get('username')
+                if new_username and new_username != shop_admin.user.username:
+                    if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
+                        messages.error(request, 'Username already exists!')
+                        return render(request, 'home.html', {'form': form, 'shop_admin': shop_admin})
+                    shop_admin.user.username = new_username
+                    shop_admin.user.save()
 
-            # Handle password change
-            new_password = form.cleaned_data.get('password')
-            if new_password:
-                shop_admin.user.set_password(new_password)
-                shop_admin.user.save()
-                messages.success(request, 'Password updated successfully. Please login again.')
-                logout(request)
-                return redirect('shop_admin_login')
+                # Handle password change if provided
+                new_password = form.cleaned_data.get('password')
+                if new_password:
+                    shop_admin.user.set_password(new_password)
+                    shop_admin.user.save()
+                    messages.success(request, 'Password updated successfully. Please login again.')
+                    logout(request)
+                    return redirect('shop_admin_login')
 
-            # Save other profile changes
-            shop_admin = form.save(commit=False)
+                # Save shop admin profile updates
+                profile = form.save(commit=False)
+                
+                # Update social media links
+                profile.instagram_link = form.cleaned_data.get('instagram_link')
+                profile.facebook_link = form.cleaned_data.get('facebook_link')
+                profile.whatsapp_link = form.cleaned_data.get('whatsapp_link')
+                profile.google_link = form.cleaned_data.get('google_link')
+                
+                # Update basic info
+                profile.shop_name = form.cleaned_data.get('shop_name')
+                profile.responsible_person = form.cleaned_data.get('responsible_person')
+                profile.address = form.cleaned_data.get('address')
+                profile.location = form.cleaned_data.get('location')
+                profile.phone_number = form.cleaned_data.get('phone_number')
 
-            # Handle logo upload
-            if 'logo' in request.FILES:
-                shop_admin.logo = request.FILES['logo']
-            
-            shop_admin.save()
-            messages.success(request, 'Profile updated successfully!')
-            profile_updated = True  # Set the flag to True
-            return redirect('home')
+                # Handle logo upload
+                if 'logo' in request.FILES:
+                    profile.logo = request.FILES['logo']
+
+                profile.save()
+                messages.success(request, 'Profile updated successfully!')
+                return redirect('home')
+
+            except Exception as e:
+                messages.error(request, f'Error updating profile: {str(e)}')
     else:
-        form = ShopAdminProfileForm(instance=shop_admin, initial={
+        # Initialize form with current values
+        initial_data = {
             'username': shop_admin.user.username,
+            'shop_name': shop_admin.shop_name,
+            'responsible_person': shop_admin.responsible_person,
+            'address': shop_admin.address,
+            'location': shop_admin.location,
+            'phone_number': shop_admin.phone_number,
             'instagram_link': shop_admin.instagram_link,
             'facebook_link': shop_admin.facebook_link,
             'whatsapp_link': shop_admin.whatsapp_link,
-            'google_link': shop_admin.google_link
-           
-        })
+            'google_link': shop_admin.google_link,
+            'amount': shop_admin.amount
+        }
+        form = ShopAdminProfileForm(instance=shop_admin, initial=initial_data)
 
-    context = {
+    return render(request, 'home.html', {
         'form': form,
         'shop_admin': shop_admin,
-        'profile_updated': profile_updated,  # Pass the flag to the template
-    }
-    return render(request, 'home.html', context)
+    })
 
 
 
