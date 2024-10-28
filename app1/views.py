@@ -348,7 +348,7 @@ def superuser_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('shop_admin_login')
-
+# gg
 
 @login_required
 def upload_image_view(request):  # Changed the name from `UploadedImage` to `upload_image_view`
