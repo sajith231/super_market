@@ -170,6 +170,8 @@ def change_validity_after_365_days(profile_id):
     except ShopAdminProfile.DoesNotExist:
         pass
 
+
+
 @login_required
 def create_shop_admin(request): 
     if not request.user.is_superuser:
@@ -211,7 +213,7 @@ def edit_shop_admin(request, profile_id):
     profile = get_object_or_404(ShopAdminProfile, id=profile_id)
     
     if request.method == 'POST':
-        form = ShopAdminProfileForm(request.POST, request.FILES, instance=profile)
+        form = ShopAdminProfileForm(request.POST, request.FILES, instance=profile, is_home_page=False)
         if form.is_valid():
             try:
                 if hasattr(profile, 'user') and profile.user:
@@ -257,7 +259,7 @@ def edit_shop_admin(request, profile_id):
             'whatsapp_link': profile.whatsapp_link,
             'google_link': profile.google_link,
         }
-        form = ShopAdminProfileForm(instance=profile, initial=initial_data)
+        form = ShopAdminProfileForm(instance=profile, initial=initial_data, is_home_page=False)
 
     return render(request, 'edit_shop_admin.html', {
         'form': form, 
@@ -265,27 +267,42 @@ def edit_shop_admin(request, profile_id):
         'has_user': hasattr(profile, 'user') and profile.user is not None
     })
 
-
 @login_required
-def toggle_status(request, profile_id):
-    if not request.user.is_superuser:
-        return HttpResponseForbidden("You don't have permission to access this page.")
-    
-    profile = get_object_or_404(ShopAdminProfile, id=profile_id)
-    profile.status = not profile.status
-    
-    if profile.status:  # If the profile is being enabled
-        profile.validity = 'running'
-        profile.expiry_date = timezone.now() + timedelta(days=365)  # Set expiry to one year from now
-        # Start a thread to change the validity status after one year
-        threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
+def home(request):
+    shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
+
+    if request.method == 'POST':
+        form = ShopAdminProfileForm(request.POST, request.FILES, instance=shop_admin, is_home_page=True)
+        if form.is_valid():
+            try:
+                # ... rest of the existing home view code ...
+                form.save()
+                messages.success(request, 'Profile updated successfully!')
+                return redirect('home')
+            except Exception as e:
+                messages.error(request, f'Error updating profile: {str(e)}')
     else:
-        profile.expiry_date = None  # Clear the expiry date when disabling
-    
-    profile.save()
-    status_text = "enabled" if profile.status else "disabled"
-    messages.success(request, f'Shop admin account has been {status_text}.')
-    return redirect('superuser_dashboard')
+        initial_data = {
+            'username': shop_admin.user.username,
+            'shop_name': shop_admin.shop_name,
+            'responsible_person': shop_admin.responsible_person,
+            'address': shop_admin.address,
+            'location': shop_admin.location,
+            'phone_number': shop_admin.phone_number,
+            'instagram_link': shop_admin.instagram_link,
+            'facebook_link': shop_admin.facebook_link,
+            'whatsapp_link': shop_admin.whatsapp_link,
+            'google_link': shop_admin.google_link
+        }
+        form = ShopAdminProfileForm(instance=shop_admin, initial=initial_data, is_home_page=True)
+
+    return render(request, 'home.html', {
+        'form': form,
+        'shop_admin': shop_admin,
+    })
+
+
+
     
 
 @login_required
@@ -470,79 +487,6 @@ def download_qr_code(request):
 
 
 
-@login_required
-def home(request):
-    shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
-
-    if request.method == 'POST':
-        form = ShopAdminProfileForm(request.POST, request.FILES, instance=shop_admin)
-        if form.is_valid():
-            try:
-                # Handle username change if it's different
-                new_username = form.cleaned_data.get('username')
-                if new_username and new_username != shop_admin.user.username:
-                    if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
-                        messages.error(request, 'Username already exists!')
-                        return render(request, 'home.html', {'form': form, 'shop_admin': shop_admin})
-                    shop_admin.user.username = new_username
-                    shop_admin.user.save()
-
-                # Handle password change if provided
-                new_password = form.cleaned_data.get('password')
-                if new_password:
-                    shop_admin.user.set_password(new_password)
-                    shop_admin.user.save()
-                    messages.success(request, 'Password updated successfully. Please login again.')
-                    logout(request)
-                    return redirect('shop_admin_login')
-
-                # Save shop admin profile updates
-                profile = form.save(commit=False)
-                
-                # Update social media links
-                profile.instagram_link = form.cleaned_data.get('instagram_link')
-                profile.facebook_link = form.cleaned_data.get('facebook_link')
-                profile.whatsapp_link = form.cleaned_data.get('whatsapp_link')
-                profile.google_link = form.cleaned_data.get('google_link')
-                
-                # Update basic info
-                profile.shop_name = form.cleaned_data.get('shop_name')
-                profile.responsible_person = form.cleaned_data.get('responsible_person')
-                profile.address = form.cleaned_data.get('address')
-                profile.location = form.cleaned_data.get('location')
-                profile.phone_number = form.cleaned_data.get('phone_number')
-
-                # Handle logo upload
-                if 'logo' in request.FILES:
-                    profile.logo = request.FILES['logo']
-
-                profile.save()
-                messages.success(request, 'Profile updated successfully!')
-                return redirect('home')
-
-            except Exception as e:
-                messages.error(request, f'Error updating profile: {str(e)}')
-    else:
-        # Initialize form with current values
-        initial_data = {
-            'username': shop_admin.user.username,
-            'shop_name': shop_admin.shop_name,
-            'responsible_person': shop_admin.responsible_person,
-            'address': shop_admin.address,
-            'location': shop_admin.location,
-            'phone_number': shop_admin.phone_number,
-            'instagram_link': shop_admin.instagram_link,
-            'facebook_link': shop_admin.facebook_link,
-            'whatsapp_link': shop_admin.whatsapp_link,
-            'google_link': shop_admin.google_link,
-            'amount': shop_admin.amount
-        }
-        form = ShopAdminProfileForm(instance=shop_admin, initial=initial_data)
-
-    return render(request, 'home.html', {
-        'form': form,
-        'shop_admin': shop_admin,
-    })
 
 
 

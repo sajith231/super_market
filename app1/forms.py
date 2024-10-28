@@ -178,13 +178,17 @@ class ShopAdminProfileForm(forms.ModelForm):
         required=False,
         widget=forms.URLInput(attrs={'class': 'form-control mb-3'})
     )
+    amount = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
+    )
 
     class Meta:
         model = ShopAdminProfile
         fields = [
             'username', 'shop_name', 'responsible_person', 'address', 
             'location', 'phone_number', 'logo', 'instagram_link', 
-            'facebook_link', 'whatsapp_link', 'google_link'
+            'facebook_link', 'whatsapp_link', 'google_link', 'amount'
         ]
         widgets = {
             'address': forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 3}),
@@ -192,6 +196,15 @@ class ShopAdminProfileForm(forms.ModelForm):
             'phone_number': forms.TextInput(attrs={'class': 'form-control mb-3'}),
             'logo': forms.ClearableFileInput(attrs={'class': 'form-control mb-3'}),
         }
+
+    def __init__(self, *args, is_home_page=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label_suffix = ""
+        
+        # Remove amount field if it's the home page
+        if is_home_page:
+            if 'amount' in self.fields:
+                del self.fields['amount']
 
     def clean(self):
         cleaned_data = super().clean()
