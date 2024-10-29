@@ -329,8 +329,8 @@ def toggle_status(request, profile_id):
         # Start a thread to change the validity status after 365 days
         threading.Thread(target=change_validity_after_365_days, args=(profile.id,)).start()
     else:  # If the profile is being disabled
-        # Store the current expiry date as the latest expiry date
-        profile.expiry_date = timezone.now()  # Set to current time when disabled
+        # Do not update the expiry date
+        pass
     
     profile.save()
     status_text = "enabled" if profile.status else "disabled"
