@@ -147,7 +147,7 @@ def shop_admin_dashboard(request):
     }
     
     return render(request, 'shop_admin_dashboard.html', context)
-
+# hgd
 
 
 def generate_qr_code_async(request, shop_admin_id):
