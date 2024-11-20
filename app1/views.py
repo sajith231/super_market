@@ -59,38 +59,76 @@ def login_view(request):
 def shop_admin_dashboard(request):
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
     
+    # Delete expired images
+    current_date = timezone.now().date()
+    expired_images = UploadedImage.objects.filter(
+        shop_admin_profile=shop_admin,
+        validity_date__lt=current_date  # Get images where validity date is less than current date
+    )
+    
+    # Delete the expired images and their files
+    for image in expired_images:
+        if image.image:  # Check if image file exists
+            try:
+                # Delete the physical file
+                if os.path.isfile(image.image.path):
+                    os.remove(image.image.path)
+            except Exception as e:
+                messages.error(request, f'Error deleting file for expired image: {str(e)}')
+        # Delete the database record
+        image.delete()
+    
+    if expired_images:
+        messages.warning(request, f'{expired_images.count()} expired image(s) have been automatically removed.')
+    
     if request.method == 'POST':
         if 'upload_logo' in request.POST:
+            # Handle logo upload
             if request.FILES.get('shop_logo'):
                 shop_admin.logo = request.FILES['shop_logo']
                 shop_admin.save()
+                messages.success(request, 'Shop logo updated successfully!')
+            else:
+                messages.error(request, 'No logo file selected. Please try again.')
+        
         elif 'upload_image' in request.POST:
+            # Handle image upload
             form = ImageUploadForm(request.POST, request.FILES)
             if form.is_valid():
                 new_image = form.save(commit=False)
                 new_image.shop_admin_profile = shop_admin
                 new_image.display_order = UploadedImage.objects.filter(shop_admin_profile=shop_admin).count() + 1
+                new_image.validity_date = form.cleaned_data['validity_date']
+                
+                # Check if validity date is in the past
+                if new_image.validity_date < current_date:
+                    messages.error(request, 'Cannot upload image with an expired validity date.')
+                    return redirect('shop_admin_dashboard')
+                
                 new_image.save()
+                messages.success(request, 'Image uploaded successfully!')
             else:
-                messages.error(request, 'Error uploading image. Please check the file format and try again.')
-                print("Form errors:", form.errors)  # debugging print for errors
+                messages.error(request, 'Error uploading image. Please check the form and try again.')
+        
         elif 'generate_qr' in request.POST:
+            # Handle QR code generation
             return generate_qr_code(request)
+
+    # Get remaining valid images
+    images = shop_admin.uploaded_images.all()
     
-    # Generate the production URL for display
-    protocol = 'https://' if settings.PRODUCTION_SERVER.get('USE_HTTPS') else 'http://'
-    server_ip = settings.PRODUCTION_SERVER.get('IP')
-    server_port = settings.PRODUCTION_SERVER.get('PORT')
-    base_url = f"{protocol}{server_ip}:{server_port}"
-    index_path = reverse('index_with_uid', kwargs={'uid': shop_admin.uid})
-    production_url = urljoin(base_url, index_path)
-    
+    # Add validity check for remaining images
+    for image in images:
+        if image.validity_date:
+            image.is_valid = image.validity_date >= current_date
+
     context = {
         'form': ImageUploadForm(),
-        'images': shop_admin.uploaded_images.all(),
+        'images': images,
         'shop_admin': shop_admin,
-        'qr_code_url': production_url,
+        'qr_code_url': request.build_absolute_uri(reverse('index_with_uid', kwargs={'uid': shop_admin.uid})),
         'can_edit': shop_admin.validity != 'payment pending',
+        'current_date': current_date,
     }
     
     return render(request, 'shop_admin_dashboard.html', context)

@@ -37,9 +37,18 @@ class ShopAdminLoginForm(forms.Form):
         return cleaned_data
 
 class ImageUploadForm(forms.ModelForm):
+    validity_date = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'required': 'required'
+        }),
+        label='Poster Validity'
+    )
+
     class Meta:
         model = UploadedImage
-        fields = ['image']
+        fields = ['image', 'validity_date']
         widgets = {
             'image': forms.ClearableFileInput(attrs={
                 'class': 'form-control',

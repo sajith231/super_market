@@ -9,68 +9,95 @@
     {% block extra_css %}{% endblock %}
     <style>
         body {
-            background: linear-gradient(45deg, #49a09d, #5f2c82);
+            background: linear-gradient(45deg, orange, rgb(255, 140, 0));
             min-height: 100vh;
             display: flex;
             align-items: center;
-            font-family: sans-serif;
-            font-weight: 100;
+            justify-content: center;
+            font-family: 'Roboto', sans-serif;
         }
-        .card {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
+        .login-container {
+            background-color: white;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
-        .card-header {
-            background-color: #55608f;
-            color: #fff;
-            padding: 20px;
-        }
-        .card-body {
+        .logo-section {
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
             padding: 30px;
         }
+        .logo-section img {
+            max-width: 160px;
+            margin-bottom: 15px;
+        }
+        .logo-section h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .form-section {
+            padding: 40px;
+        }
+        .form-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: rgb(255, 140, 0); /* Matches logo color */
+        }
         .form-control {
-            background-color: rgba(255,255,255,0.8);
-            border: none;
-            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
         }
         .form-control:focus {
-            background-color: rgba(255,255,255,1);
-            box-shadow: 0 0 0 0.2rem rgba(85,96,143,0.25);
+            background-color: white;
+            border-color: rgb(214, 124, 13);
+            box-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
         }
         .btn-primary {
-            background-color: #55608f;
-            border-color: #55608f;
+            background-color: rgb(255, 140, 0);
+            border-color: rgb(255, 140, 0);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 10px;
         }
         .btn-primary:hover {
-            background-color: #4a5579;
-            border-color: #4a5579;
+            background-color: #e67e22;
+            border-color: #e67e22;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .footer a {
+            color: rgb(255, 140, 0);
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="text-center m-0">Login</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="container">
-            
-            <!-- {% if messages %}
-                <div class="alert alert-info" role="alert">
-                    {% for message in messages %}
-                        {{ message }}
-                    {% endfor %}
-                </div>
-            {% endif %} -->
-    
-            
-        </div>
+            <div class="col-md-8">
+                <div class="row login-container">
+                    <!-- Logo Section -->
+                    <div class="col-md-4 logo-section">
+                        <img src="{% static 'images/imclogo.png' %}" alt="Logo">
                         
+                    </div>
+                    <!-- Login Form Section -->
+                    <div class="col-md-8 form-section">
+                        <h2>Login</h2>
                         <form method="post" action="{% url 'shop_admin_login' %}">
                             {% csrf_token %}
                             <div class="mb-3">
@@ -83,8 +110,12 @@
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">Login</button>
+                                <div class="footer">
+                                    <p>Powered by <a href="https://imcbsglobal.com" target="_blank">IMC Business Solutions</a></p>
+                                </div>
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </div>

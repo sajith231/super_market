@@ -57,11 +57,11 @@ class UploadedImage(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     display_order = models.PositiveIntegerField(default=0)
     shop_admin_profile = models.ForeignKey(ShopAdminProfile, on_delete=models.CASCADE, related_name='uploaded_images')
+    validity_date = models.DateField(null=True, blank=True)  # Add this line if not present
 
     def __str__(self):
         return self.image.name
 
     class Meta:
         ordering = ['display_order', '-uploaded_at']
-
 
