@@ -81,7 +81,16 @@ def shop_admin_dashboard(request):
     if expired_images:
         messages.warning(request, f'{expired_images.count()} expired image(s) have been automatically removed.')
     
+    # Check if this is a POST request coming from a form submission
     if request.method == 'POST':
+        # Use session to prevent duplicate submissions
+        if request.session.get('last_post_data') == request.POST:
+            # If the current POST data matches the last submission, redirect
+            return redirect('shop_admin_dashboard')
+        
+        # Store the current POST data in the session
+        request.session['last_post_data'] = request.POST
+        
         if 'upload_logo' in request.POST:
             # Handle logo upload
             if request.FILES.get('shop_logo'):
@@ -107,6 +116,12 @@ def shop_admin_dashboard(request):
                 
                 new_image.save()
                 messages.success(request, 'Image uploaded successfully!')
+                
+                # Clear the last_post_data to allow future submissions
+                request.session.pop('last_post_data', None)
+                
+                # Redirect to prevent form resubmission
+                return redirect('shop_admin_dashboard')
             else:
                 messages.error(request, 'Error uploading image. Please check the form and try again.')
         

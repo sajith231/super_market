@@ -61,8 +61,8 @@
                     <p class="text-center">Images displayed on the home page:</p>
                     <div class="row row-cols-2 row-cols-md-4 g-4">
                         {% for image in images %}
-                        <div class="col">
-                            <div class="image-item card h-100">
+                        <div class="col" >
+                            <div class="image-item card h-100" >
                                 <img src="{{ image.image.url }}" alt="{{ image.description }}" class="card-img-top" 
                                      style="cursor: pointer; height: 200px; object-fit: cover;"
                                      onclick="showImage('{{ image.image.url }}', '{{ image.description }}')">
