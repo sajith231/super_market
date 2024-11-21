@@ -73,7 +73,7 @@
                                 <div class="card-body text-center">
                                     {% if image.validity_date %}
                                         {% if image.is_valid %}
-                                            <span class="badge bg-success">Valid until: {{ image.validity_date }}</span>
+                                            <span style="background-color: rgb(162, 248, 162);">Valid until: {{ image.validity_date }}</span>
                                         {% else %}
                                             <span class="badge bg-danger">Expired on: {{ image.validity_date }}</span>
                                         {% endif %}
