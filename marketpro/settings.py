@@ -38,7 +38,7 @@ ALLOWED_HOSTS = [
 
 # New settings for server configuration
 PRODUCTION_SERVER = {
-    'IP': '88.222.215.20',  # Your production server IP
+    'IP': 'offerqr.imcbs.com',  # Your production server IP
     'PORT': '8000',         # Your production server port
     'USE_HTTPS': False,     # Set to True if using HTTPS
 }
