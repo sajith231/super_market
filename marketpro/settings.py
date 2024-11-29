@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://qroffer.store',
+    'https://www.qroffer.store',
+]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,13 +36,13 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '88.222.215.20',
-    'offerqr.imcbs.com'
+    'qroffer.store'
       # Your server IP
 ]
 
 # New settings for server configuration
 PRODUCTION_SERVER = {
-    'IP': 'offerqr.imcbs.com',  # Your production server IP
+    'IP': 'qroffer.store',  # Your production server IP
     'PORT': '8000',         # Your production server port
     'USE_HTTPS': False,     # Set to True if using HTTPS
 }

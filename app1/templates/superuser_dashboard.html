@@ -113,7 +113,7 @@
                         <th style="white-space: nowrap;">Validity</th>
                         <th style="white-space: nowrap;">Status</th>
                         <th style="white-space: nowrap;">Expire Date</th>
-                        <th style="white-space: nowrap;">Actions</th>
+                        <th style="white-space: nowrap;text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -152,7 +152,7 @@
                         <td>
                            <span style="white-space: nowrap;"> {{ profile|get_expiry_date|date:"Y-m-d" }}</span>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap; padding-left: 100px;padding-right: 100px;">
                             <div style="display: flex;">
                                 <a href="{% url 'edit_shop_admin' profile.id %}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-edit"></i>
