@@ -157,12 +157,12 @@ class ShopAdminProfileForm(forms.ModelForm):
     )
     password = forms.CharField(
         required=False,
-        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
-        help_text="Leave empty if you don't want to change it"
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'}),  # Changed from PasswordInput to TextInput
+        help_text="Current password will be displayed"
     )
     confirm_password = forms.CharField(
         required=False,
-        widget=forms.PasswordInput(attrs={'class': 'form-control mb-3'}),
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'}),  # Changed from PasswordInput to TextInput
         help_text="Confirm new password"
     )
     shop_name = forms.CharField(
@@ -220,6 +220,7 @@ class ShopAdminProfileForm(forms.ModelForm):
         password = cleaned_data.get('password')
         confirm_password = cleaned_data.get('confirm_password')
 
+        # Allow keeping the current password if no changes are made
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match")
 

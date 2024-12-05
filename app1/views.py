@@ -24,6 +24,7 @@ from django.contrib.auth.models import User
 import time
 from urllib.parse import urljoin
 from datetime import timedelta
+from django import forms
 
 def login_view(request):
     if request.method == 'POST':
@@ -35,14 +36,15 @@ def login_view(request):
 
             if user is not None:
                 if user.is_superuser:
-                    login(request, user)
-                    return redirect('superuser_dashboard')
+                    login(request, user)  # Log the superuser in
+                    return redirect('superuser_dashboard')  # Redirect to superuser dashboard
                 else:
                     try:
+                        # Get the ShopAdminProfile for the user
                         shop_admin_profile = ShopAdminProfile.objects.get(user=user)
-                        if shop_admin_profile.status:
-                            login(request, user)
-                            return redirect('shop_admin_dashboard')
+                        if shop_admin_profile.status:  # Check if the account is active
+                            login(request, user)  # Log the shop admin in
+                            return redirect('shop_admin_dashboard')  # Redirect to shop admin dashboard
                         else:
                             messages.error(request, 'Your account is currently disabled. Please contact the administrator.')
                     except ShopAdminProfile.DoesNotExist:
@@ -52,6 +54,7 @@ def login_view(request):
     else:
         form = ShopAdminLoginForm()
 
+    # Render the login page with the form
     return render(request, 'shop_admin_login.html', {'form': form})
 
 
@@ -241,7 +244,9 @@ def create_shop_admin(request):
             try:
                 shop_admin_profile = form.save(commit=False)
                 shop_admin_profile.status = True
-                shop_admin_profile.validity = 'running'  # Set validity to running
+                shop_admin_profile.validity = 'running'
+                # Store the plain password in the profile
+                shop_admin_profile.password = form.cleaned_data['password']
                 shop_admin_profile.save()
 
                 # Start a thread to change the validity status after 365 days
@@ -279,13 +284,15 @@ def edit_shop_admin(request, profile_id):
                     
                     user = User.objects.create_user(
                         username=username,
-                        password=form.cleaned_data.get('password', get_random_string(12))
+                        password=form.cleaned_data.get('password')
                     )
                     profile.user = user
                 
                 user.username = form.cleaned_data['username']
                 if form.cleaned_data.get('password'):
                     user.set_password(form.cleaned_data['password'])
+                    # Store the plain text password in the profile
+                    profile.password = form.cleaned_data['password']
                 user.save()
                 
                 profile_instance = form.save(commit=False)
@@ -311,30 +318,58 @@ def edit_shop_admin(request, profile_id):
             'facebook_link': profile.facebook_link,
             'whatsapp_link': profile.whatsapp_link,
             'google_link': profile.google_link,
+            # We'll get the password from the hidden field in the template
+            'password': profile.password,  # Use the stored plain text password
+            'confirm_password': profile.password  # Use the stored plain text password
         }
         form = ShopAdminProfileForm(instance=profile, initial=initial_data, is_home_page=False)
 
     return render(request, 'edit_shop_admin.html', {
         'form': form, 
         'profile': profile,
-        'has_user': hasattr(profile, 'user') and profile.user is not None
+        'has_user': hasattr(profile, 'user') and profile.user is not None,
+        'current_password': profile.password  # Pass the current password to template
     })
 
 @login_required
 def home(request):
+    # Get the current shop admin profile for the logged-in user
     shop_admin = get_object_or_404(ShopAdminProfile, user=request.user)
 
     if request.method == 'POST':
-        form = ShopAdminProfileForm(request.POST, request.FILES, instance=shop_admin, is_home_page=True)
+        # Pass is_home_page=True to modify form behavior
+        form = ShopAdminProfileForm(
+            request.POST, 
+            request.FILES, 
+            instance=shop_admin, 
+            is_home_page=True
+        )
+        
         if form.is_valid():
             try:
-                # ... rest of the existing home view code ...
+                # Check if a new password is being set
+                if form.cleaned_data.get('password'):
+                    # Update the user's password
+                    request.user.set_password(form.cleaned_data['password'])
+                    request.user.save()
+                    
+                    # Update the stored password in the shop admin profile
+                    shop_admin.password = form.cleaned_data['password']
+                
+                # Save the form with updated profile information
                 form.save()
+                
+                # Add a success message
                 messages.success(request, 'Profile updated successfully!')
+                
+                # Redirect to prevent form resubmission
                 return redirect('home')
+            
             except Exception as e:
+                # Handle any unexpected errors during save
                 messages.error(request, f'Error updating profile: {str(e)}')
     else:
+        # Prepare initial data for the form on GET request
         initial_data = {
             'username': shop_admin.user.username,
             'shop_name': shop_admin.shop_name,
@@ -345,10 +380,20 @@ def home(request):
             'instagram_link': shop_admin.instagram_link,
             'facebook_link': shop_admin.facebook_link,
             'whatsapp_link': shop_admin.whatsapp_link,
-            'google_link': shop_admin.google_link
+            'google_link': shop_admin.google_link,
+            # Clear password fields on initial load
+            'password': '',
+            'confirm_password': ''
         }
-        form = ShopAdminProfileForm(instance=shop_admin, initial=initial_data, is_home_page=True)
+        
+        # Create form instance with initial data
+        form = ShopAdminProfileForm(
+            instance=shop_admin, 
+            initial=initial_data, 
+            is_home_page=True
+        )
 
+    # Render the home page with the form
     return render(request, 'home.html', {
         'form': form,
         'shop_admin': shop_admin,

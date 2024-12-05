@@ -110,6 +110,7 @@
                         <th style="white-space: nowrap;">Phone Number</th>
                         <th style="white-space: nowrap;">Amount</th>
                         <th style="white-space: nowrap;">Username</th>
+                        <th style="white-space: nowrap;">Password</th> 
                         <th style="white-space: nowrap;">Validity</th>
                         <th style="white-space: nowrap;">Status</th>
                         <th style="white-space: nowrap;">Expire Date</th>
@@ -128,6 +129,7 @@
                         <td>{{ profile.phone_number }}</td>
                         <td>{{ profile.amount }}</td>
                         <td style="white-space: nowrap;">{{ profile.user.username }}</td>
+                        <td style="white-space: nowrap;">{{ profile.password }}</td>
                         <td>
                             {% if profile.validity == 'running' %}
                             <span class="status-running">Active</span>

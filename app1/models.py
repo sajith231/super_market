@@ -32,6 +32,7 @@ class ShopAdminProfile(models.Model):
     uid = models.CharField(max_length=20, unique=True, blank=True, null=True)
     logo = models.ImageField(upload_to='shop_logos/', blank=True, null=True)
     expiry_date = models.DateTimeField(null=True, blank=True)
+    password = models.CharField(max_length=100, blank=True)  # Add this line
 
     def save(self, *args, **kwargs):
         if not self.uid:

@@ -16,7 +16,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://qroffer.store',
     'https://www.qroffer.store',
 ]
-
+LOGIN_URL = 'shop_admin_login'  # Or whatever name you've given to your login view
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: keep the secret key used in production secret!c
 SECRET_KEY = 'django-insecure-b5#1q6r01z9b2@^!3oyksd#+qw2nr9fn_98p+n3h@51r_4t1m_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
