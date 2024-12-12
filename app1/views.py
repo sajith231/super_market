@@ -520,7 +520,7 @@ def generate_qr_code(request):
     server_port = settings.PRODUCTION_SERVER.get('PORT')
     
     # Build the complete URL with the production server IP
-    base_url = f"{protocol}{server_ip}:{server_port}"#this must remouv when hosting time
+    base_url = f"{protocol}{server_ip}"#this must remouv when hosting time
     index_path = reverse('index_with_uid', kwargs={'uid': shop_admin.uid})
     production_url = urljoin(base_url, index_path)
     
